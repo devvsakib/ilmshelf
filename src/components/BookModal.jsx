@@ -2,6 +2,16 @@ import { useState } from 'react'
 import { motion } from 'motion/react'
 import { IconX, IconCheck, IconEyeOff } from '@tabler/icons-react'
 import { uid } from '@/App'
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 
 function BookModal({ book, shelves, onClose, onSave }) {
     const [form, setForm] = useState(book || {
@@ -97,6 +107,7 @@ function BookModal({ book, shelves, onClose, onSave }) {
                             <label className="block text-sm font-medium mb-1">লেখক (Writer)</label>
                             <input
                                 value={form.authors.writter}
+                                placeholder='লেখকের নাম'
                                 onChange={e => updateNestedField('authors', 'writter', e.target.value)}
                                 className="w-full p-2 border rounded-lg"
                             />
@@ -105,14 +116,16 @@ function BookModal({ book, shelves, onClose, onSave }) {
                             <label className="block text-sm font-medium mb-1">অনুবাদক (Translator)</label>
                             <input
                                 value={form.authors.translator}
+                                placeholder='অনুবাদক নাম'
                                 onChange={e => updateNestedField('authors', 'translator', e.target.value)}
                                 className="w-full p-2 border rounded-lg"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">প্রকাশক (Publisher)</label>
+                            <label className="block text-sm font-medium mb-1">প্রকাশনী (Publisher)</label>
                             <input
                                 value={form.authors.publisher}
+                                placeholder='প্রকাশনী নাম'
                                 onChange={e => updateNestedField('authors', 'publisher', e.target.value)}
                                 className="w-full p-2 border rounded-lg"
                             />
@@ -134,6 +147,7 @@ function BookModal({ book, shelves, onClose, onSave }) {
                             <label className="block text-sm font-medium mb-1">দাম (Price) ৳</label>
                             <input
                                 type="number"
+                                placeholder='0'
                                 value={form.price}
                                 onChange={e => updateField('price', e.target.value)}
                                 className="w-full p-2 border rounded-lg"
@@ -143,6 +157,7 @@ function BookModal({ book, shelves, onClose, onSave }) {
                             <label className="block text-sm font-medium mb-1">পৃষ্ঠা (Pages)</label>
                             <input
                                 type="number"
+                                placeholder='0'
                                 value={form.pages}
                                 onChange={e => updateField('pages', e.target.value)}
                                 className="w-full p-2 border rounded-lg"
@@ -152,6 +167,7 @@ function BookModal({ book, shelves, onClose, onSave }) {
                             <label className="block text-sm font-medium mb-1">Published Year</label>
                             <input
                                 type="number"
+                                placeholder={new Date().getFullYear()}
                                 value={form.publishedYear}
                                 onChange={e => updateField('publishedYear', e.target.value)}
                                 className="w-full p-2 border rounded-lg"

@@ -155,21 +155,16 @@ function BookDetail({ books, setBooks, deleteBook, openEdit }) {
                         <div className="grid md:grid-cols-3 gap-4 mb-6">
                             <div>
                                 <label className="block text-sm font-medium mb-2">Reading Status</label>
-                                <select
-                                    value={book.readStatus}
-                                    onChange={e => updateStatus(e.target.value)}
+                                <p
                                     className="w-full p-2 border rounded-lg"
                                 >
-                                    <option value="NOT_STARTED">Not Started</option>
-                                    <option value="IN_PROGRESS">In Progress</option>
-                                    <option value="COMPLETED">Completed</option>
-                                </select>
+                                    {book.readStatus}
+                                </p>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">Privacy</label>
                                 <button
-                                    onClick={togglePrivacy}
                                     className={`w-full p-2 border rounded-lg flex items-center justify-center gap-2 transition-colors ${book.private ? 'bg-gray-100 border-gray-300' : 'bg-emerald-50 border-emerald-300'
                                         }`}
                                 >
