@@ -121,7 +121,7 @@ function BookDetail({ books, setBooks, deleteBook, openEdit }) {
                             )}
                             {book.authors?.publisher && (
                                 <div className="flex items-center gap-2 text-slate-700">
-                                    <span className="font-medium">প্রকাশক:</span>
+                                    <span className="font-medium">প্রকাশনী:</span>
                                     <span>{book.authors.publisher}</span>
                                 </div>
                             )}
