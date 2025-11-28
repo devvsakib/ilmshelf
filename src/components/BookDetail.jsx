@@ -110,19 +110,19 @@ function BookDetail({ books, setBooks, deleteBook, openEdit }) {
                             {book.authors?.writter && (
                                 <div className="flex items-center gap-2 text-slate-700">
                                     <span className="font-medium">লেখক:</span>
-                                    <span>{book.authors.writter}</span>
+                                    <span className="font-semibold">{book.authors.writter}</span>
                                 </div>
                             )}
                             {book.authors?.translator && (
                                 <div className="flex items-center gap-2 text-slate-700">
                                     <span className="font-medium">অনুবাদক:</span>
-                                    <span>{book.authors.translator}</span>
+                                    <span className="font-semibold">{book.authors.translator}</span>
                                 </div>
                             )}
                             {book.authors?.publisher && (
                                 <div className="flex items-center gap-2 text-slate-700">
                                     <span className="font-medium">প্রকাশনী:</span>
-                                    <span>{book.authors.publisher}</span>
+                                    <span className="font-semibold">{book.authors.publisher}</span>
                                 </div>
                             )}
                         </div>

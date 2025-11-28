@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { IconBook, IconSearch, IconChartBar, IconPlus, IconTarget, IconHeart, IconUsers, IconDownload, IconUpload } from '@tabler/icons-react'
+import { IconBook, IconSearch, IconChartBar, IconPlus, IconTarget, IconHeart, IconUsers, IconDownload, IconUpload, IconEye, IconEyeOff } from '@tabler/icons-react'
 
-function Header({ q, setQ, onExport, onImport, onOpenGoals, onOpenWishlist, onOpenLending }) {
+function Header({ q, setQ, onExport, onImport, onOpenGoals, onOpenWishlist, onOpenLending, isCoverHidden, setIsCoverHidden }) {
     const fileInputRef = useRef(null)
     const [menuOpen, setMenuOpen] = useState(false)
 
@@ -64,6 +64,24 @@ function Header({ q, setQ, onExport, onImport, onOpenGoals, onOpenWishlist, onOp
                                 >
                                     <IconUsers size={16} />
                                     Lending Tracker
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsCoverHidden(!isCoverHidden);
+                                        setMenuOpen(false)
+                                    }}
+                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                    {
+                                        isCoverHidden ?
+                                            <IconEye size={16} /> :
+                                            <IconEyeOff size={16} />
+                                    }
+                                    {
+                                        isCoverHidden ?
+                                            'Show Covers' :
+                                            'Hide Covers'
+                                    }
                                 </button>
                                 <div className="border-t my-2" />
                                 <button

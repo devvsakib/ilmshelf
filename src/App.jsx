@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import {IconPlus, IconX, IconCheck } from '@tabler/icons-react'
+import { IconPlus, IconX, IconCheck } from '@tabler/icons-react'
 import Header from './components/Header'
 import ReadingGoals from './components/ReadingGoals'
 import Wishlist from './components/Wishlist'
@@ -88,7 +88,7 @@ export default function App() {
     const saved = localStorage.getItem('ilmshelf_books')
     return saved ? JSON.parse(saved) : INITIAL_BOOKS
   })
-
+  const [isCoverHidden, setIsCoverHidden] = useState(false)
   const [shelves] = useState(INITIAL_SHELVES)
   const [searchQuery, setSearchQuery] = useState('')
   const [toast, setToast] = useState(null)
@@ -97,6 +97,13 @@ export default function App() {
   const [showGoals, setShowGoals] = useState(false)
   const [showWishlist, setShowWishlist] = useState(false)
   const [showLending, setShowLending] = useState(false)
+
+  useEffect(() => {
+    const settings = JSON.parse(localStorage.getItem('ilmshelf_settings') || '{}')
+    if (settings.isCoverHidden !== undefined && settings.isCoverHidden !== isCoverHidden) {
+      setIsCoverHidden(settings.isCoverHidden)
+    }
+  }, [])
 
   // Save to localStorage whenever books change
   useEffect(() => {
@@ -173,6 +180,15 @@ export default function App() {
     e.target.value = ''
   }
 
+  // set this in localstorage making settings object name, isCoverHidden
+  useEffect(() => {
+    const settings = JSON.parse(localStorage.getItem('ilmshelf_settings') || '{}')
+    settings.isCoverHidden = isCoverHidden
+    localStorage.setItem('ilmshelf_settings', JSON.stringify(settings))
+  }, [isCoverHidden])
+
+
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
@@ -184,6 +200,8 @@ export default function App() {
           onOpenGoals={() => setShowGoals(true)}
           onOpenWishlist={() => setShowWishlist(true)}
           onOpenLending={() => setShowLending(true)}
+          isCoverHidden={isCoverHidden}
+          setIsCoverHidden={setIsCoverHidden}
         />
 
         <main className="pb-8">
@@ -210,6 +228,7 @@ export default function App() {
                   <BookList
                     books={filteredBooks}
                     onOpen={(id) => window.location.href = `/book/${id}`}
+                    isCoverHidden={isCoverHidden}
                   />
                 </div>
               }

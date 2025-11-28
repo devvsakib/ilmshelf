@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { IconBook } from '@tabler/icons-react'
 import BookCard from './BookCard'
 
-function BookList({ books, onOpen }) {
+function BookList({ books, onOpen, isCoverHidden }) {
     if (!books.length) {
         return (
             <div className="text-center py-12">
@@ -16,7 +16,7 @@ function BookList({ books, onOpen }) {
         <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence>
                 {books.map(b => (
-                    <BookCard key={b.id} book={b} onOpen={onOpen} />
+                    <BookCard key={b.id} book={b} onOpen={onOpen} isCoverHidden={isCoverHidden} />
                 ))}
             </AnimatePresence>
         </motion.div>

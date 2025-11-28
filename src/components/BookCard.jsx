@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import { IconEyeOff } from '@tabler/icons-react'
 
-function BookCard({ book, onOpen }) {
+function BookCard({ book, onOpen, isCoverHidden }) {
     const statusColors = {
         'NOT_STARTED': 'bg-gray-100 text-gray-700',
         'IN_PROGRESS': 'bg-blue-100 text-blue-700',
@@ -19,7 +19,7 @@ function BookCard({ book, onOpen }) {
             onClick={() => onOpen(book.id)}
         >
             <div className="flex gap-4">
-                <div className="flex-shrink-0">
+                {!isCoverHidden && <div className="flex-shrink-0">
                     <img
                         src={book.cover}
                         alt={book.title.bn}
@@ -28,7 +28,7 @@ function BookCard({ book, onOpen }) {
                             e.target.src = `https://via.placeholder.com/200x300/059669/ffffff?text=${encodeURIComponent(book.title.bn.slice(0, 3))}`
                         }}
                     />
-                </div>
+                </div>}
                 <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-slate-900 truncate">{book.title.bn}</h3>
                     <p className="text-xs text-slate-600 truncate mt-1">
