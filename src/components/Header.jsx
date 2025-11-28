@@ -94,16 +94,16 @@ export default function Header({ q, setQ, onExport, onImport, onOpenGoals, onOpe
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48">
                                     <DropdownMenuItem onClick={() => { onOpenGoals(); }}>
-                                        <div className="flex items-center gap-2"><IconTarget size={16} />Reading Goals</div>
+                                        <div className="flex items-center gap-2 cursor-pointer"><IconTarget size={16} />Reading Goals</div>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => { onOpenWishlist(); }}>
-                                        <div className="flex items-center gap-2"><IconHeart size={16} />Wishlist</div>
+                                        <div className="flex items-center gap-2 cursor-pointer"><IconHeart size={16} />Wishlist</div>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => { onOpenLending(); }}>
-                                        <div className="flex items-center gap-2"><IconUsers size={16} />Lending Tracker</div>
+                                        <div className="flex items-center gap-2 cursor-pointer"><IconUsers size={16} />Lending Tracker</div>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => { setIsCoverHidden(!isCoverHidden); }}>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2 cursor-pointer">
                                             {isCoverHidden ? <IconEye size={16} /> : <IconEyeOff size={16} />}
                                             {isCoverHidden ? 'Show Covers' : 'Hide Covers'}
                                         </div>
@@ -112,10 +112,10 @@ export default function Header({ q, setQ, onExport, onImport, onOpenGoals, onOpe
                                     <div className="border-t my-2" />
 
                                     <DropdownMenuItem onClick={() => { onExport(); }}>
-                                        <div className="flex items-center gap-2"><IconDownload size={16} />Export Data</div>
+                                        <div className="flex items-center gap-2 cursor-pointer"><IconDownload size={16} />Export Data</div>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => { fileInputRef.current?.click(); }}>
-                                        <div className="flex items-center gap-2"><IconUpload size={16} />Import Data</div>
+                                        <div className="flex items-center gap-2 cursor-pointer"><IconUpload size={16} />Import Data</div>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
