@@ -13,6 +13,7 @@ import BookDetail from './components/BookDetail'
 import BookModal from './components/BookModal'
 import BookList from './components/BookList'
 import DotsAndBoxes from './pages/DotsAndBoxes'
+import Home from './pages/Home'
 
 // Sample initial data
 const INITIAL_BOOKS = [
@@ -209,30 +210,7 @@ export default function App() {
           <Routes>
             <Route
               path="/"
-              element={
-                <div className="max-w-7xl mx-auto p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h1 className="text-3xl font-bold text-slate-900">My Books</h1>
-                      <p className="text-slate-600 mt-1">
-                        {filteredBooks.length} {filteredBooks.length === 1 ? 'book' : 'books'} in collection
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setIsAddingBook(true)}
-                      className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-md"
-                    >
-                      <IconPlus size={20} />
-                      Add Book
-                    </button>
-                  </div>
-                  <BookList
-                    books={filteredBooks}
-                    onOpen={(id) => window.location.href = `/book/${id}`}
-                    isCoverHidden={isCoverHidden}
-                  />
-                </div>
-              }
+              element={<Home filteredBooks={filteredBooks} isCoverHidden={isCoverHidden} setIsAddingBook={setIsAddingBook} />}
             />
             <Route
               path="/book/:id"
