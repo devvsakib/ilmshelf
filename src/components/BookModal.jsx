@@ -252,7 +252,7 @@ export default function BookModal({ book, shelves, onClose, onSave }) {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="grid gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">লেখক (Writer)</label>
                                 <Input
