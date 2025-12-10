@@ -63,17 +63,15 @@ function BookDetail({ books, setBooks, deleteBook, openEdit }) {
             </button>
 
             <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="grid md:grid-cols-[200px,1fr] gap-6">
-                    <div>
-                        <img
-                            src={book.cover}
-                            alt={book.title.bn}
-                            className="w-full rounded-lg shadow-md"
-                            onError={(e) => {
-                                e.target.src = `https://via.placeholder.com/200x300/059669/ffffff?text=${encodeURIComponent(book.title.bn.slice(0, 3))}`
-                            }}
-                        />
-                    </div>
+                <div className="flex md:flex-row flex-col gap-6">
+                    <img
+                        src={book.cover}
+                        alt={book.title.bn}
+                        className="w-4/12 rounded-lg shadow-md mx-auto"
+                        onError={(e) => {
+                            e.target.src = `https://via.placeholder.com/200x300/059669/ffffff?text=${encodeURIComponent(book.title.bn.slice(0, 3))}`
+                        }}
+                    />
 
                     <div>
                         <div className="flex items-start justify-between mb-4">

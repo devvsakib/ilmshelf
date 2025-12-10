@@ -162,26 +162,43 @@ export default function App() {
   }
 
   const importData = (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const reader = new FileReader()
+    const reader = new FileReader();
+
     reader.onload = (event) => {
       try {
-        const imported = JSON.parse(event.target.result)
-        if (Array.isArray(imported)) {
-          setBooks(imported)
-          showToast('Data imported successfully!', 'success')
-        } else {
-          showToast('Invalid file format', 'error')
+        const imported = JSON.parse(event.target.result);
+
+        if (!Array.isArray(imported)) {
+          showToast('Invalid file format', 'error');
+          return;
         }
+
+        setBooks((prev = []) => {
+          const existingNames = new Set(prev.map(b => b.title?.bn.trim().toLowerCase()));
+
+          const newItems = imported.filter(
+            item => !existingNames.has(item.title?.bn.trim().toLowerCase())
+          );
+
+          return [...prev, ...newItems];
+        });
+
+        showToast('Data imported successfully!', 'success');
       } catch (err) {
-        showToast('Failed to import data', 'error')
+        console.error(err);
+        showToast('Failed to import data', 'error');
+      } finally {
+        e.target.value = '';
       }
-    }
-    reader.readAsText(file)
-    e.target.value = ''
-  }
+    };
+
+    reader.readAsText(file);
+  };
+
+
 
   // set this in localstorage making settings object name, isCoverHidden
   useEffect(() => {
