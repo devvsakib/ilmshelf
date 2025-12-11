@@ -15,6 +15,7 @@ import BookList from './components/BookList'
 import DotsAndBoxes from './pages/DotsAndBoxes'
 import Home from './pages/Home'
 import AnalyticsPage from './components/AnalyticsPage'
+import Writters from './pages/Writters'
 
 // Sample initial data
 const INITIAL_BOOKS = [
@@ -254,6 +255,7 @@ export default function App() {
               }
             />
             <Route path="/summary" element={<SummaryPage books={books} />} />
+            <Route path="/writters" element={<Writters books={books} />} />
             <Route path="/game" element={<DotsAndBoxes />} />
             <Route path="*" element={<div className="p-6 text-center">Page not found</div>} />
           </Routes>
