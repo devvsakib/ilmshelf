@@ -30,6 +30,13 @@ import { cn } from '@/lib/utils'
 export default function Header({ q, setQ, onExport, onImport, onOpenGoals, onOpenWishlist, onOpenLending, isCoverHidden, setIsCoverHidden }) {
     const fileInputRef = useRef(null)
     const [menuOpen, setMenuOpen] = useState(false)
+    // get path usapp
+
+    const path = window.location.pathname;
+    const isUSApp = path === '/usapp';
+    if (isUSApp) {
+        return null; // Do not render the header on the /usapp route
+    }
 
     return (
         <header className="sticky top-0 z-40 bg-white border-b shadow-sm">

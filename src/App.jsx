@@ -16,6 +16,7 @@ import DotsAndBoxes from './pages/DotsAndBoxes'
 import Home from './pages/Home'
 import AnalyticsPage from './components/AnalyticsPage'
 import Writters from './pages/Writters'
+import USApp from './pages/UdyoktaStudio'
 
 // Sample initial data
 const INITIAL_BOOKS = [
@@ -213,6 +214,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
+
         <Header
           q={searchQuery}
           setQ={setSearchQuery}
@@ -224,40 +226,29 @@ export default function App() {
           isCoverHidden={isCoverHidden}
           setIsCoverHidden={setIsCoverHidden}
         />
-
         <main className="pb-8">
           <Routes>
             <Route
               path="/"
               element={<Home filteredBooks={filteredBooks} isCoverHidden={isCoverHidden} setIsAddingBook={setIsAddingBook} />}
-            />
-            <Route
-              path="/book/:id"
-              element={
-                <BookDetail
-                  books={books}
-                  setBooks={setBooks}
-                  deleteBook={deleteBook}
-                  openEdit={setEditingBookId}
-                />
-              }
-            />
-            <Route path="/shelves" element={<ShelvesPage shelves={shelves} books={books} />} />
-            <Route path="/analytics" element={<AnalyticsPage shelves={shelves} books={books} />} />
-            <Route
-              path="/shelf/:id"
-              element={
+            >
+              <Route path="/book/:id" element={<BookDetail books={books} setBooks={setBooks} deleteBook={deleteBook} openEdit={setEditingBookId} />} />
+              <Route path="/shelves" element={<ShelvesPage shelves={shelves} books={books} />} />
+              <Route path="/analytics" element={<AnalyticsPage shelves={shelves} books={books} />} />
+              <Route path="/shelf/:id" element={
                 <ShelfRoute
                   books={books}
                   shelves={shelves}
                   onOpen={(id) => window.location.href = `/book/${id}`}
                 />
               }
-            />
-            <Route path="/summary" element={<SummaryPage books={books} />} />
-            <Route path="/writters" element={<Writters books={books} />} />
-            <Route path="/game" element={<DotsAndBoxes />} />
-            <Route path="*" element={<div className="p-6 text-center">Page not found</div>} />
+              />
+              <Route path="/summary" element={<SummaryPage books={books} />} />
+              <Route path="/writters" element={<Writters books={books} />} />
+              <Route path="/game" element={<DotsAndBoxes />} />
+              <Route path="*" element={<div className="p-6 text-center">Page not found</div>} />
+            </Route>
+            <Route path="/usapp" element={<USApp />} />
           </Routes>
         </main>
 
