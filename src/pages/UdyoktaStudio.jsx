@@ -5,9 +5,9 @@ import USHeader from './udyoktastudio/USHeader';
 import Hero from './udyoktastudio/Hero';
 import Problem from './udyoktastudio/Problem';
 import Solution from './udyoktastudio/Solution';
-import Demo from './udyoktastudio/Demo';
+import Demo from './udyoktastudio/TechStack';
 import Services from './udyoktastudio/Services';
-import TechStack from './udyoktastudio/TechStack';
+import TechStack from './udyoktastudio/Demo';
 import Process from './udyoktastudio/Process';
 import Contact from './udyoktastudio/Contact';
 import Footer from './udyoktastudio/Footer';
@@ -54,7 +54,12 @@ const translations = {
             title: "See Demo Before You Decide",
             text: "We don't just talk — we show you a live demo.",
             cta: "Open Live Demo Store",
-            note: "No signup required"
+            note: "No signup required",
+            demoList: [
+                { name: "Fashion Demo", link: "/usapp/demo/fashion" },
+                { name: "Cosmetics Demo", link: "/usapp/demo/cosmetics" },
+                { name: "Gadgets Demo", link: "/usapp/demo/gadgets" },
+            ]
         },
         services: {
             title: "What We Build for You",
@@ -134,7 +139,12 @@ const translations = {
             title: "Decision নেওয়ার আগে Demo দেখুন",
             text: "আমরা শুধু কথা বলি না — live demo দেখাই।",
             cta: "Live Demo Store খুলুন",
-            note: "কোনো signup লাগবে না"
+            note: "কোনো signup লাগবে না",
+            demoList: [
+                { name: "ফ্যাশন ডেমো", link: "/usapp/demo/fashion" },
+                { name: "কসমেটিক্স ডেমো", link: "/usapp/demo/cosmetics" },
+                { name: "গ্যাজেটস ডেমো", link: "/usapp/demo/gadgets" }
+            ]
         },
         services: {
             title: "আমরা আপনার জন্য কী তৈরি করি",

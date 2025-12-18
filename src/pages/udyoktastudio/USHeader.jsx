@@ -16,6 +16,7 @@ function USHeader() {
                 : 'bg-white/80 border-slate-200'
                 }`}
         >
+            <title>UdyoktaStudio - From Page to Brand</title>
             <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
                 <motion.div
                     className="flex items-center gap-2"

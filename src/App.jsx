@@ -17,6 +17,13 @@ import Home from './pages/Home'
 import AnalyticsPage from './components/AnalyticsPage'
 import Writters from './pages/Writters'
 import USApp from './pages/UdyoktaStudio'
+import CosmeticsDemo from './pages/udyoktastudio/demo/CosmeticsDemo'
+import NotFound from './pages/NotFound'
+import GadgetsDemo from './pages/udyoktastudio/demo/GadgetsDemo'
+import USAppLayout from './pages/USAppLayout'
+import BookAppLayout from './pages/BookAppLayout'
+import FashionDemo from './pages/udyoktastudio/demo/FashionDemo'
+import HoneySeed from './pages/udyoktastudio/demo/HoneySeed'
 
 // Sample initial data
 const INITIAL_BOOKS = [
@@ -228,14 +235,13 @@ export default function App() {
         />
         <main className="pb-8">
           <Routes>
-            <Route
-              path="/"
-              element={<Home filteredBooks={filteredBooks} isCoverHidden={isCoverHidden} setIsAddingBook={setIsAddingBook} />}
-            >
-              <Route path="/book/:id" element={<BookDetail books={books} setBooks={setBooks} deleteBook={deleteBook} openEdit={setEditingBookId} />} />
-              <Route path="/shelves" element={<ShelvesPage shelves={shelves} books={books} />} />
-              <Route path="/analytics" element={<AnalyticsPage shelves={shelves} books={books} />} />
-              <Route path="/shelf/:id" element={
+            {/* Book Management App Routes */}
+            <Route path="/" element={<BookAppLayout />}>
+              <Route index element={<Home filteredBooks={filteredBooks} isCoverHidden={isCoverHidden} setIsAddingBook={setIsAddingBook} />} />
+              <Route path="book/:id" element={<BookDetail books={books} setBooks={setBooks} deleteBook={deleteBook} openEdit={setEditingBookId} />} />
+              <Route path="shelves" element={<ShelvesPage shelves={shelves} books={books} />} />
+              <Route path="analytics" element={<AnalyticsPage shelves={shelves} books={books} />} />
+              <Route path="shelf/:id" element={
                 <ShelfRoute
                   books={books}
                   shelves={shelves}
@@ -243,12 +249,22 @@ export default function App() {
                 />
               }
               />
-              <Route path="/summary" element={<SummaryPage books={books} />} />
-              <Route path="/writters" element={<Writters books={books} />} />
-              <Route path="/game" element={<DotsAndBoxes />} />
-              <Route path="*" element={<div className="p-6 text-center">Page not found</div>} />
+              <Route path="summary" element={<SummaryPage books={books} />} />
+              <Route path="writters" element={<Writters books={books} />} />
+              <Route path="game" element={<DotsAndBoxes />} />
             </Route>
-            <Route path="/usapp" element={<USApp />} />
+
+            {/* UdyoktaStudio App Routes */}
+            <Route path="/usapp" element={<USAppLayout />}>
+              <Route index element={<USApp />} />
+              <Route path="demo/fashion" element={<FashionDemo />} />
+              <Route path="demo/cosmetics" element={<CosmeticsDemo />} />
+              <Route path="demo/gadgets" element={<GadgetsDemo />} />
+              <Route path="demo/honeyseed" element={<HoneySeed />} />
+            </Route>
+
+            {/* 404 Not Found */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
 

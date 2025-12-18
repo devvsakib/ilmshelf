@@ -8,7 +8,7 @@ function Home({ filteredBooks, isCoverHidden, setIsAddingBook }) {
         <div>
           <h1 className="text-3xl font-bold text-slate-900">My Books</h1>
           <p className="text-slate-600 mt-1">
-            {filteredBooks.length} {filteredBooks.length === 1 ? 'book' : 'books'} in collection
+            {filteredBooks?.length} {filteredBooks?.length === 1 ? 'book' : 'books'} in collection
           </p>
         </div>
         <button
