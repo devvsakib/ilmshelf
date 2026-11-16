@@ -1,18 +1,19 @@
 function SummaryPage({ books }) {
-    const total = books.reduce((sum, b) => sum + (b.price || 0), 0)
+    const total = books.reduce((sum, b) => sum + Number(b.price || 0), 0);
     const byStatus = books.reduce((acc, b) => {
-        acc[b.readStatus] = (acc[b.readStatus] || 0) + 1
-        return acc
-    }, {})
+        const status = b.readStatus || 'NOT_STARTED';
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+    }, {});
 
     const statusData = [
         { label: 'Not Started', value: byStatus['NOT_STARTED'] || 0, color: 'bg-gray-500' },
         { label: 'In Progress', value: byStatus['IN_PROGRESS'] || 0, color: 'bg-blue-500' },
         { label: 'Completed', value: byStatus['COMPLETED'] || 0, color: 'bg-emerald-500' }
-    ]
+    ];
 
-    const totalBooks = books.length
-    const avgPrice = totalBooks > 0 ? (total / totalBooks).toFixed(2) : 0
+    const totalBooks = books.length;
+    const avgPrice = totalBooks > 0 ? (total / totalBooks).toFixed(2) : 0;
 
     return (
         <div className="max-w-6xl mx-auto p-6">
@@ -42,7 +43,7 @@ function SummaryPage({ books }) {
                 <h2 className="text-xl font-bold mb-4">Reading Progress</h2>
                 <div className="space-y-4">
                     {statusData.map(stat => {
-                        const percentage = totalBooks > 0 ? (stat.value / totalBooks * 100).toFixed(1) : 0
+                        const percentage = totalBooks > 0 ? ((stat.value / totalBooks) * 100).toFixed(1) : 0;
                         return (
                             <div key={stat.label}>
                                 <div className="flex items-center justify-between mb-2">
@@ -56,12 +57,12 @@ function SummaryPage({ books }) {
                                     />
                                 </div>
                             </div>
-                        )
+                        );
                     })}
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default SummaryPage;

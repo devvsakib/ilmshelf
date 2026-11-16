@@ -1,0 +1,48 @@
+[
+  {
+    "id": "b1",
+    "title": {
+      "en": "siratur-rasul-sa",
+      "bn": "সীরাতুর রাসূল (ছাঃ)"
+    },
+    "authors": {
+      "writter": "মুহাম্মদ আসাদুল্লাহ আল-গালিব",
+      "publisher": "হাদীছ ফাউন্ডেশন বাংলাদেশ"
+    },
+    "cover": "https://sunnahbookshop.com/wp-content/uploads/2025/05/siratur-rasul-sa.webp",
+    "price": 750,
+    "pages": 854,
+    "shelfId": "islamic",
+    "readStatus": "IN_PROGRESS",
+    "private": false,
+    "notes": "Excellent biography of the Prophet",
+    "readingTime": "14 days",
+    "purchaseDate": "2024-06-15",
+    "publishedYear": 2020,
+    "isbn": "978-1906999736",
+    "description": "আর রাহীকুল মাখতূম: একটি অনবদ্য সীরাত-গ্রন্থ।"
+  },
+  {
+    "id": "b2",
+    "title": {
+      "en": "tafsir-ibn-kathir",
+      "bn": "তাফসীর ইবনে কাসীর"
+    },
+    "authors": {
+      "writter": "ইমাম ইবনে কাসীর",
+      "translator": "মুহাম্মদ মুজিবুর রহমান",
+      "publisher": "ইসলামিক ফাউন্ডেশন"
+    },
+    "cover": "https://via.placeholder.com/200x300/059669/ffffff?text=Tafsir",
+    "price": 1200,
+    "pages": 1500,
+    "shelfId": "islamic",
+    "readStatus": "NOT_STARTED",
+    "private": false,
+    "notes": "",
+    "readingTime": "",
+    "purchaseDate": "2024-08-20",
+    "publishedYear": 2018,
+    "description": "Comprehensive Quran commentary"
+  }
+]

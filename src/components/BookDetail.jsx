@@ -1,14 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { IconEdit, IconTrash, IconShare, IconEye, IconEyeOff } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconShare, IconEye, IconEyeOff, IconBook } from "@tabler/icons-react";
 
 function BookDetail({ books, setBooks, deleteBook, openEdit }) {
-    const { id } = useParams()
-    const navigate = useNavigate()
-    const book = books.find(x => x.id === id)
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const book = books.find(x => x.id === id);
 
     if (!book) {
         return (
@@ -22,36 +19,38 @@ function BookDetail({ books, setBooks, deleteBook, openEdit }) {
                     Go Home
                 </button>
             </div>
-        )
+        );
     }
+
+    const displayTitle = book.title?.bn || book.title?.en || 'Untitled';
 
     const updateStatus = (status) => {
-        setBooks(prev => prev.map(x => x.id === book.id ? { ...x, readStatus: status } : x))
-    }
+        setBooks(prev => prev.map(x => x.id === book.id ? { ...x, readStatus: status } : x));
+    };
 
     const togglePrivacy = () => {
-        setBooks(prev => prev.map(x => x.id === book.id ? { ...x, private: !x.private } : x))
-    }
+        setBooks(prev => prev.map(x => x.id === book.id ? { ...x, private: !x.private } : x));
+    };
 
     const share = async () => {
-        const url = `${window.location.origin}/book/${book.id}`
+        const url = `${window.location.origin}/book/${book.id}`;
         const shareData = {
-            title: book.title.bn,
-            text: `Check out "${book.title.bn}" on IlmShelf`,
+            title: displayTitle,
+            text: `Check out "${displayTitle}" on IlmShelf`,
             url
-        }
+        };
 
         try {
-            if (navigator.share && navigator.canShare(shareData)) {
-                await navigator.share(shareData)
+            if (navigator.share && navigator.canShare?.(shareData)) {
+                await navigator.share(shareData);
             } else {
-                await navigator.clipboard.writeText(url)
-                alert('Link copied to clipboard!')
+                await navigator.clipboard.writeText(url);
+                alert('Link copied to clipboard!');
             }
         } catch (err) {
-            console.error('Error sharing:', err)
+            console.error('Error sharing:', err);
         }
-    }
+    };
 
     return (
         <div className="max-w-5xl mx-auto p-6">
@@ -66,18 +65,18 @@ function BookDetail({ books, setBooks, deleteBook, openEdit }) {
                 <div className="flex md:flex-row flex-col gap-6">
                     <img
                         src={book.cover}
-                        alt={book.title.bn}
-                        className="w-4/12 rounded-lg shadow-md mx-auto"
+                        alt={displayTitle}
+                        className="w-4/12 rounded-lg shadow-md mx-auto object-cover"
                         onError={(e) => {
-                            e.target.src = `https://via.placeholder.com/200x300/059669/ffffff?text=${encodeURIComponent(book.title.bn.slice(0, 3))}`
+                            e.target.src = `https://via.placeholder.com/200x300/059669/ffffff?text=${encodeURIComponent(displayTitle.slice(0, 3))}`;
                         }}
                     />
 
-                    <div>
+                    <div className="flex-1">
                         <div className="flex items-start justify-between mb-4">
                             <div>
-                                <h1 className="text-3xl font-bold text-slate-900">{book.title.bn}</h1>
-                                {book.title.en && (
+                                <h1 className="text-3xl font-bold text-slate-900">{displayTitle}</h1>
+                                {book.title?.en && book.title?.bn && (
                                     <p className="text-lg text-slate-600 mt-1">{book.title.en}</p>
                                 )}
                             </div>
@@ -90,10 +89,10 @@ function BookDetail({ books, setBooks, deleteBook, openEdit }) {
                                     <IconEdit size={18} />
                                 </button>
                                 <button
-                                    onClick={() => {
+                                    onClick={async () => {
                                         if (confirm('Are you sure you want to delete this book?')) {
-                                            deleteBook(book.id)
-                                            navigate('/')
+                                            await deleteBook(book.id);
+                                            navigate('/');
                                         }
                                     }}
                                     className="p-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
@@ -128,7 +127,7 @@ function BookDetail({ books, setBooks, deleteBook, openEdit }) {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                             <div className="bg-emerald-50 rounded-lg p-3">
                                 <div className="text-xs text-emerald-600 font-medium">Price</div>
-                                <div className="text-xl font-bold text-emerald-700">{book.price} ৳</div>
+                                <div className="text-xl font-bold text-emerald-700">{book.price || 0} ৳</div>
                             </div>
                             {book.pages > 0 && (
                                 <div className="bg-blue-50 rounded-lg p-3">
@@ -153,16 +152,22 @@ function BookDetail({ books, setBooks, deleteBook, openEdit }) {
                         <div className="grid md:grid-cols-3 gap-4 mb-6">
                             <div>
                                 <label className="block text-sm font-medium mb-2">Reading Status</label>
-                                <p
-                                    className="w-full p-2 border rounded-lg"
-                                >
-                                    {book.readStatus}
-                                </p>
+                                <Select value={book.readStatus} onValueChange={updateStatus}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="NOT_STARTED">Not Started</SelectItem>
+                                        <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                                        <SelectItem value="COMPLETED">Completed</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">Privacy</label>
                                 <button
+                                    onClick={togglePrivacy}
                                     className={`w-full p-2 border rounded-lg flex items-center justify-center gap-2 transition-colors ${book.private ? 'bg-gray-100 border-gray-300' : 'bg-emerald-50 border-emerald-300'
                                         }`}
                                 >
@@ -200,7 +205,7 @@ function BookDetail({ books, setBooks, deleteBook, openEdit }) {
                 </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default BookDetail;

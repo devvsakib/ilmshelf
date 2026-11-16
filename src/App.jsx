@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
-import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { IconPlus, IconX, IconCheck } from '@tabler/icons-react'
+import { IconX, IconCheck } from '@tabler/icons-react'
 import Header from './components/Header'
 import ReadingGoals from './components/ReadingGoals'
 import Wishlist from './components/Wishlist'
@@ -11,7 +11,6 @@ import ShelfDetail from './components/ShelfDetail'
 import ShelvesPage from './components/ShelvesPage'
 import BookDetail from './components/BookDetail'
 import BookModal from './components/BookModal'
-import BookList from './components/BookList'
 import DotsAndBoxes from './pages/DotsAndBoxes'
 import Home from './pages/Home'
 import AnalyticsPage from './components/AnalyticsPage'
@@ -24,43 +23,7 @@ import USAppLayout from './pages/USAppLayout'
 import BookAppLayout from './pages/BookAppLayout'
 import FashionDemo from './pages/udyoktastudio/demo/FashionDemo'
 import HoneySeed from './pages/udyoktastudio/demo/HoneySeed'
-
-// Sample initial data
-const INITIAL_BOOKS = [
-  {
-    "id": "b1",
-    "title": { "en": "siratur-rasul-sa", "bn": "সীরাতুর রাসূল (ছাঃ)" },
-    "authors": { "writter": "মুহাম্মদ আসাদুল্লাহ আল-গালিব", "publisher": "হাদীছ ফাউন্ডেশন বাংলাদেশ" },
-    "cover": "https://sunnahbookshop.com/wp-content/uploads/2025/05/siratur-rasul-sa.webp",
-    "price": 750,
-    "pages": 854,
-    "shelfId": "islamic",
-    "readStatus": "IN_PROGRESS",
-    "private": false,
-    "notes": "Excellent biography of the Prophet",
-    "readingTime": "14 days",
-    "purchaseDate": "2024-06-15",
-    "publishedYear": 2020,
-    "isbn": "978-1906999736",
-    "description": "আর রাহীকুল মাখতূম: একটি অনবদ্য সীরাত-গ্রন্থ।"
-  },
-  {
-    "id": "b2",
-    "title": { "en": "tafsir-ibn-kathir", "bn": "তাফসীর ইবনে কাসীর" },
-    "authors": { "writter": "ইমাম ইবনে কাসীর", "translator": "মুহাম্মদ মুজিবুর রহমান", "publisher": "ইসলামিক ফাউন্ডেশন" },
-    "cover": "https://via.placeholder.com/200x300/059669/ffffff?text=Tafsir",
-    "price": 1200,
-    "pages": 1500,
-    "shelfId": "islamic",
-    "readStatus": "NOT_STARTED",
-    "private": false,
-    "notes": "",
-    "readingTime": "",
-    "purchaseDate": "2024-08-20",
-    "publishedYear": 2018,
-    "description": "Comprehensive Quran commentary"
-  }
-]
+import { useBooks } from './hooks/useBooks'
 
 const INITIAL_SHELVES = [
   { id: 'general', name: 'General', description: 'Everyday reads', color: 'blue' },
@@ -76,7 +39,12 @@ function Toast({ message, type = 'info', onClose }) {
     return () => clearTimeout(t)
   }, [onClose])
 
-  const bgColor = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-red-600' : 'bg-gray-900'
+  const bgColor =
+    type === 'success'
+      ? 'bg-emerald-600'
+      : type === 'error'
+        ? 'bg-red-600'
+        : 'bg-gray-900'
 
   return (
     <motion.div
@@ -94,13 +62,23 @@ function Toast({ message, type = 'info', onClose }) {
   )
 }
 
-// Main App Component
 export default function App() {
-  const [books, setBooks] = useState(() => {
-    const saved = localStorage.getItem('ilmshelf_books')
-    return saved ? JSON.parse(saved) : INITIAL_BOOKS
+  const {
+    books,
+    loading,
+    error,
+    addBook,
+    updateBook,
+    deleteBook: removeBookFromApi,
+    refetch
+  } = useBooks({
+    adminMode: true
   })
-  const [isCoverHidden, setIsCoverHidden] = useState(false)
+
+  const [isCoverHidden, setIsCoverHidden] = useState(() => {
+    const settings = JSON.parse(localStorage.getItem('ilmshelf_settings') || '{}')
+    return Boolean(settings.isCoverHidden)
+  })
   const [shelves] = useState(INITIAL_SHELVES)
   const [searchQuery, setSearchQuery] = useState('')
   const [toast, setToast] = useState(null)
@@ -110,52 +88,82 @@ export default function App() {
   const [showWishlist, setShowWishlist] = useState(false)
   const [showLending, setShowLending] = useState(false)
 
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type })
+  }
+
+  // Persist UI cover setting in localStorage
   useEffect(() => {
     const settings = JSON.parse(localStorage.getItem('ilmshelf_settings') || '{}')
-    if (settings.isCoverHidden !== undefined && settings.isCoverHidden !== isCoverHidden) {
-      setIsCoverHidden(settings.isCoverHidden)
-    }
-  }, [])
+    settings.isCoverHidden = isCoverHidden
+    localStorage.setItem('ilmshelf_settings', JSON.stringify(settings))
+  }, [isCoverHidden])
 
-  // Save to localStorage whenever books change
+  // Show API load error if fetching fails
   useEffect(() => {
-    localStorage.setItem('ilmshelf_books', JSON.stringify(books))
-  }, [books])
+    if (error) {
+      showToast(error, 'error')
+    }
+  }, [error])
 
   const filteredBooks = useMemo(() => {
     const term = searchQuery.trim().toLowerCase()
     if (!term) return books
 
-    return books.filter(b => {
-      const titleMatch = b.title.bn.toLowerCase().includes(term) || b.title.en.toLowerCase().includes(term)
-      const authorMatch = Object.values(b.authors || {}).some(author =>
-        author && author.toLowerCase().includes(term)
+    return books.filter((b) => {
+      const titleMatch =
+        (b.title?.bn || '').toLowerCase().includes(term) ||
+        (b.title?.en || '').toLowerCase().includes(term)
+      const authorMatch = Object.values(b.authors || {}).some(
+        (author) => author && author.toLowerCase().includes(term)
       )
       return titleMatch || authorMatch
     })
   }, [books, searchQuery])
 
-  const addOrUpdateBook = (bookData) => {
-    if (bookData.id && books.find(b => b.id === bookData.id)) {
-      // Update existing
-      setBooks(prev => prev.map(b => b.id === bookData.id ? bookData : b))
-      showToast('Book updated successfully!', 'success')
-    } else {
-      // Add new
-      setBooks(prev => [bookData, ...prev])
-      showToast('Book added successfully!', 'success')
+  const addOrUpdateBook = async (bookData, coverFile) => {
+    try {
+      const exists = bookData.id && books.some((b) => b.id === bookData.id)
+      if (exists) {
+        await updateBook(bookData.id, bookData, coverFile)
+        showToast('Book updated successfully!', 'success')
+      } else {
+        const payload = { ...bookData, id: bookData.id || uid() }
+        await addBook(payload, coverFile)
+        showToast('Book added successfully!', 'success')
+      }
+      setEditingBookId(null)
+      setIsAddingBook(false)
+    } catch (err) {
+      showToast(err.message || 'Failed to save book', 'error')
     }
-    setEditingBookId(null)
-    setIsAddingBook(false)
   }
 
-  const deleteBook = (id) => {
-    setBooks(prev => prev.filter(b => b.id !== id))
-    showToast('Book deleted', 'success')
+  const deleteBook = async (id) => {
+    try {
+      await removeBookFromApi(id)
+      showToast('Book deleted', 'success')
+    } catch (err) {
+      showToast(err.message || 'Failed to delete book', 'error')
+    }
   }
 
-  const showToast = (message, type = 'info') => {
-    setToast({ message, type })
+  // Compatibility wrapper in case BookDetail calls setBooks directly
+  const handleSetBooks = async (updater) => {
+    const nextBooks = typeof updater === 'function' ? updater(books) : updater
+    if (!Array.isArray(nextBooks)) return
+
+    for (const nextBook of nextBooks) {
+      const prevBook = books.find((b) => b.id === nextBook.id)
+      if (prevBook && JSON.stringify(prevBook) !== JSON.stringify(nextBook)) {
+        try {
+          await updateBook(nextBook.id, nextBook)
+          showToast('Book updated!', 'success')
+        } catch (err) {
+          showToast(err.message || 'Failed to sync update', 'error')
+        }
+      }
+    }
   }
 
   const exportData = () => {
@@ -171,57 +179,49 @@ export default function App() {
   }
 
   const importData = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
-    const reader = new FileReader();
+    const reader = new FileReader()
 
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
-        const imported = JSON.parse(event.target.result);
+        const imported = JSON.parse(event.target.result)
 
         if (!Array.isArray(imported)) {
-          showToast('Invalid file format', 'error');
-          return;
+          showToast('Invalid file format', 'error')
+          return
         }
 
-        setBooks((prev = []) => {
-          const existingNames = new Set(prev.map(b => b.title?.bn.trim().toLowerCase()));
+        const existingNames = new Set(
+          books.map((b) => (b.title?.bn || b.title?.en || '').trim().toLowerCase())
+        )
 
-          const newItems = imported.filter(
-            item => !existingNames.has(item.title?.bn.trim().toLowerCase())
-          );
+        const newItems = imported.filter((item) => {
+          const key = (item.title?.bn || item.title?.en || '').trim().toLowerCase()
+          return key && !existingNames.has(key)
+        })
 
-          return [...prev, ...newItems];
-        });
+        for (const item of newItems) {
+          await addBook({ ...item, id: item.id || uid() })
+        }
 
-        showToast('Data imported successfully!', 'success');
+        await refetch()
+        showToast(`Imported ${newItems.length} books successfully!`, 'success')
       } catch (err) {
-        console.error(err);
-        showToast('Failed to import data', 'error');
+        console.error(err)
+        showToast(err.message || 'Failed to import data', 'error')
       } finally {
-        e.target.value = '';
+        e.target.value = ''
       }
-    };
+    }
 
-    reader.readAsText(file);
-  };
-
-
-
-  // set this in localstorage making settings object name, isCoverHidden
-  useEffect(() => {
-    const settings = JSON.parse(localStorage.getItem('ilmshelf_settings') || '{}')
-    settings.isCoverHidden = isCoverHidden
-    localStorage.setItem('ilmshelf_settings', JSON.stringify(settings))
-  }, [isCoverHidden])
-
-
+    reader.readAsText(file)
+  }
 
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100">
-
         <Header
           q={searchQuery}
           setQ={setSearchQuery}
@@ -237,18 +237,31 @@ export default function App() {
           <Routes>
             {/* Book Management App Routes */}
             <Route path="/" element={<BookAppLayout />}>
-              <Route index element={<Home filteredBooks={filteredBooks} isCoverHidden={isCoverHidden} setIsAddingBook={setIsAddingBook} />} />
-              <Route path="book/:id" element={<BookDetail books={books} setBooks={setBooks} deleteBook={deleteBook} openEdit={setEditingBookId} />} />
+              <Route
+                index
+                element={
+                  <Home
+                    filteredBooks={filteredBooks}
+                    loading={loading}
+                    isCoverHidden={isCoverHidden}
+                    setIsAddingBook={setIsAddingBook}
+                  />
+                }
+              />
+              <Route
+                path="book/:id"
+                element={
+                  <BookDetail
+                    books={books}
+                    setBooks={handleSetBooks}
+                    deleteBook={deleteBook}
+                    openEdit={setEditingBookId}
+                  />
+                }
+              />
               <Route path="shelves" element={<ShelvesPage shelves={shelves} books={books} />} />
               <Route path="analytics" element={<AnalyticsPage shelves={shelves} books={books} />} />
-              <Route path="shelf/:id" element={
-                <ShelfRoute
-                  books={books}
-                  shelves={shelves}
-                  onOpen={(id) => window.location.href = `/book/${id}`}
-                />
-              }
-              />
+              <Route path="shelf/:id" element={<ShelfRoute books={books} shelves={shelves} />} />
               <Route path="summary" element={<SummaryPage books={books} />} />
               <Route path="writters" element={<Writters books={books} />} />
               <Route path="game" element={<DotsAndBoxes />} />
@@ -271,7 +284,7 @@ export default function App() {
         <AnimatePresence>
           {(isAddingBook || editingBookId) && (
             <BookModal
-              book={editingBookId ? books.find(b => b.id === editingBookId) : null}
+              book={editingBookId ? books.find((b) => b.id === editingBookId) : null}
               shelves={shelves}
               onClose={() => {
                 setIsAddingBook(false)
@@ -308,7 +321,15 @@ export default function App() {
   )
 }
 
-function ShelfRoute({ books, shelves, onOpen }) {
+function ShelfRoute({ books, shelves }) {
   const { id } = useParams()
-  return <ShelfDetail books={books} shelves={shelves} shelfId={id} onOpen={onOpen} />
+  const navigate = useNavigate()
+  return (
+    <ShelfDetail
+      books={books}
+      shelves={shelves}
+      shelfId={id}
+      onOpen={(bookId) => navigate(`/book/${bookId}`)}
+    />
+  )
 }
