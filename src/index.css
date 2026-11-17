@@ -4,10 +4,20 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --radius-sm: calc(var(--radius) - 4px);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) + 4px);
+    /* Typography Tokens */
+    --font-serif: "Fraunces", Georgia, serif;
+    --font-sans:
+        "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-bn-serif: "Noto Serif Bengali", Georgia, serif;
+    --font-bn-sans: "Hind Siliguri", sans-serif;
+
+    /* Crisp Editorial Radius Scale */
+    --radius-sm: calc(var(--radius) - 4px); /* 4px */
+    --radius-md: calc(var(--radius) - 2px); /* 6px */
+    --radius-lg: var(--radius); /* 8px */
+    --radius-xl: calc(var(--radius) + 4px); /* 12px */
+
+    /* Core Semantic Colors */
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-card: var(--card);
@@ -26,11 +36,21 @@
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
+
+    /* Custom Archival & Status Tokens */
+    --color-ochre: var(--ochre);
+    --color-ochre-foreground: var(--ochre-foreground);
+    --color-paper-rail: var(--paper-rail);
+    --color-hairline: var(--hairline);
+
+    /* Chart Tokens */
     --color-chart-1: var(--chart-1);
     --color-chart-2: var(--chart-2);
     --color-chart-3: var(--chart-3);
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
+
+    /* Sidebar Tokens */
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -42,95 +62,198 @@
 }
 
 :root {
-    --radius: 0.625rem;
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.129 0.042 264.695);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.129 0.042 264.695);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.129 0.042 264.695);
-    --primary: oklch(0.208 0.042 265.755);
-    --primary-foreground: oklch(0.984 0.003 247.858);
-    --secondary: oklch(0.968 0.007 247.896);
-    --secondary-foreground: oklch(0.208 0.042 265.755);
-    --muted: oklch(0.968 0.007 247.896);
-    --muted-foreground: oklch(0.554 0.046 257.417);
-    --accent: oklch(0.968 0.007 247.896);
-    --accent-foreground: oklch(0.208 0.042 265.755);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.929 0.013 255.508);
-    --input: oklch(0.929 0.013 255.508);
-    --ring: oklch(0.704 0.04 256.788);
-    --chart-1: oklch(0.646 0.222 41.116);
-    --chart-2: oklch(0.6 0.118 184.704);
-    --chart-3: oklch(0.398 0.07 227.392);
-    --chart-4: oklch(0.828 0.189 84.429);
-    --chart-5: oklch(0.769 0.188 70.08);
-    --sidebar: oklch(0.984 0.003 247.858);
-    --sidebar-foreground: oklch(0.129 0.042 264.695);
-    --sidebar-primary: oklch(0.208 0.042 265.755);
-    --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-    --sidebar-accent: oklch(0.968 0.007 247.896);
-    --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-    --sidebar-border: oklch(0.929 0.013 255.508);
-    --sidebar-ring: oklch(0.704 0.04 256.788);
+    --radius: 0.5rem; /* 8px - crisp print feel */
+
+    /* Warm Rag Paper (#F6F4EF) & Sumi Ink (#1C1917) */
+    --background: oklch(0.967 0.008 88.6);
+    --foreground: oklch(0.216 0.006 56.04);
+
+    /* Crisp Vellum Cards (#FCFBF9) */
+    --card: oklch(0.988 0.004 84.5);
+    --card-foreground: oklch(0.216 0.006 56.04);
+
+    --popover: oklch(0.988 0.004 84.5);
+    --popover-foreground: oklch(0.216 0.006 56.04);
+
+    /* Deep Botanical Forest (#1B4332) */
+    --primary: oklch(0.352 0.062 157.8);
+    --primary-foreground: oklch(0.985 0.004 84.5);
+
+    /* Warm Stone Surface (#EFECE4) */
+    --secondary: oklch(0.941 0.011 87.2);
+    --secondary-foreground: oklch(0.216 0.006 56.04);
+
+    --muted: oklch(0.941 0.011 87.2);
+    --muted-foreground: oklch(0.495 0.011 67.5); /* #686259 */
+
+    --accent: oklch(0.941 0.011 87.2);
+    --accent-foreground: oklch(0.352 0.062 157.8);
+
+    /* Terracotta Crimson (#9E2A2B) */
+    --destructive: oklch(0.458 0.145 22.8);
+
+    /* Archival Hairline Rules (#E5E0D5) */
+    --border: oklch(0.903 0.015 84.8);
+    --input: oklch(0.875 0.018 84.2);
+    --ring: oklch(0.352 0.062 157.8);
+
+    /* Custom Domain Tokens */
+    --ochre: oklch(0.558 0.112 72.4); /* #9A6B26 Burnished Ochre */
+    --ochre-foreground: oklch(0.988 0.004 84.5);
+    --paper-rail: oklch(0.952 0.01 86.5); /* #F1EEE7 Left Index Rail */
+    --hairline: oklch(0.903 0.015 84.8);
+
+    /* Editorial Chart Palette */
+    --chart-1: oklch(0.352 0.062 157.8); /* Botanical Forest */
+    --chart-2: oklch(0.558 0.112 72.4); /* Burnished Ochre */
+    --chart-3: oklch(0.415 0.055 245.2); /* Slate Indigo */
+    --chart-4: oklch(0.458 0.145 22.8); /* Terracotta */
+    --chart-5: oklch(0.545 0.025 110.5); /* Olive Stone */
+
+    /* Left Index Rail */
+    --sidebar: oklch(0.952 0.01 86.5);
+    --sidebar-foreground: oklch(0.216 0.006 56.04);
+    --sidebar-primary: oklch(0.352 0.062 157.8);
+    --sidebar-primary-foreground: oklch(0.985 0.004 84.5);
+    --sidebar-accent: oklch(0.922 0.014 85.4);
+    --sidebar-accent-foreground: oklch(0.216 0.006 56.04);
+    --sidebar-border: oklch(0.903 0.015 84.8);
+    --sidebar-ring: oklch(0.352 0.062 157.8);
 }
 
 .dark {
-    --background: oklch(0.129 0.042 264.695);
-    --foreground: oklch(0.984 0.003 247.858);
-    --card: oklch(0.208 0.042 265.755);
-    --card-foreground: oklch(0.984 0.003 247.858);
-    --popover: oklch(0.208 0.042 265.755);
-    --popover-foreground: oklch(0.984 0.003 247.858);
-    --primary: oklch(0.929 0.013 255.508);
-    --primary-foreground: oklch(0.208 0.042 265.755);
-    --secondary: oklch(0.279 0.041 260.031);
-    --secondary-foreground: oklch(0.984 0.003 247.858);
-    --muted: oklch(0.279 0.041 260.031);
-    --muted-foreground: oklch(0.704 0.04 256.788);
-    --accent: oklch(0.279 0.041 260.031);
-    --accent-foreground: oklch(0.984 0.003 247.858);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.551 0.027 264.364);
-    --chart-1: oklch(0.488 0.243 264.376);
-    --chart-2: oklch(0.696 0.17 162.48);
-    --chart-3: oklch(0.769 0.188 70.08);
-    --chart-4: oklch(0.627 0.265 303.9);
-    --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.208 0.042 265.755);
-    --sidebar-foreground: oklch(0.984 0.003 247.858);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-    --sidebar-accent: oklch(0.279 0.041 260.031);
-    --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.551 0.027 264.364);
+    /* Warm Espresso Archival Night (#161513) */
+    --background: oklch(0.195 0.006 67.5);
+    --foreground: oklch(0.935 0.008 84.5);
+
+    --card: oklch(0.228 0.007 67.5);
+    --card-foreground: oklch(0.935 0.008 84.5);
+
+    --popover: oklch(0.228 0.007 67.5);
+    --popover-foreground: oklch(0.935 0.008 84.5);
+
+    /* Sage Emerald for Dark Mode */
+    --primary: oklch(0.665 0.095 158.2);
+    --primary-foreground: oklch(0.175 0.012 158.2);
+
+    --secondary: oklch(0.268 0.008 67.5);
+    --secondary-foreground: oklch(0.935 0.008 84.5);
+
+    --muted: oklch(0.268 0.008 67.5);
+    --muted-foreground: oklch(0.685 0.012 75);
+
+    --accent: oklch(0.285 0.01 67.5);
+    --accent-foreground: oklch(0.935 0.008 84.5);
+
+    --destructive: oklch(0.625 0.165 24.5);
+
+    --border: oklch(0.315 0.009 67.5);
+    --input: oklch(0.335 0.01 67.5);
+    --ring: oklch(0.665 0.095 158.2);
+
+    --ochre: oklch(0.725 0.118 75.5);
+    --ochre-foreground: oklch(0.185 0.01 67.5);
+    --paper-rail: oklch(0.178 0.005 67.5);
+    --hairline: oklch(0.315 0.009 67.5);
+
+    --chart-1: oklch(0.665 0.095 158.2);
+    --chart-2: oklch(0.725 0.118 75.5);
+    --chart-3: oklch(0.645 0.085 245.2);
+    --chart-4: oklch(0.625 0.165 24.5);
+    --chart-5: oklch(0.665 0.045 110.5);
+
+    --sidebar: oklch(0.178 0.005 67.5);
+    --sidebar-foreground: oklch(0.935 0.008 84.5);
+    --sidebar-primary: oklch(0.665 0.095 158.2);
+    --sidebar-primary-foreground: oklch(0.175 0.012 158.2);
+    --sidebar-accent: oklch(0.255 0.008 67.5);
+    --sidebar-accent-foreground: oklch(0.935 0.008 84.5);
+    --sidebar-border: oklch(0.315 0.009 67.5);
+    --sidebar-ring: oklch(0.665 0.095 158.2);
 }
 
 @layer base {
     * {
         @apply border-border outline-ring/50;
     }
+
+    html {
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground selection:bg-primary/15 selection:text-primary;
+    }
+
+    button:not(:disabled),
+    [role="button"]:not([aria-disabled="true"]),
+    a[href] {
+        cursor: pointer;
     }
 }
 
 @layer utilities {
+    /* Bengali Typography with Diacritic-Safe Line Height */
+    .font-bn-title {
+        font-family: var(--font-bn-serif);
+        line-height: 1.55;
+        padding-top: 0.1em;
+    }
+
+    .font-bn-body {
+        font-family: var(--font-bn-sans);
+        line-height: 1.6;
+    }
+
+    /* Editorial Serif Display */
+    .font-editorial {
+        font-family: var(--font-serif);
+        font-optical-sizing: auto;
+    }
+
+    /* Tabular Figures for Catalog Numbers & Page Counts */
+    .tabular-nums {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Tactile Cloth-Bound Book Spine Crease */
+    .book-spine-effect {
+        position: relative;
+        box-shadow:
+            0 1px 2px rgba(28, 25, 23, 0.08),
+            0 6px 14px -4px rgba(28, 25, 23, 0.12),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    .book-spine-effect::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.22) 0%,
+            rgba(0, 0, 0, 0.24) 4%,
+            rgba(255, 255, 255, 0.12) 7%,
+            rgba(0, 0, 0, 0.05) 11%,
+            transparent 18%
+        );
+    }
+
+    /* Subtle Rag-Paper Grain Overlay */
+    .paper-grain {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.028'/%3E%3C/svg%3E");
+    }
+
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
 
-    /* Hide scrollbar for IE, Edge, and Firefox */
     .no-scrollbar {
-        -ms-overflow-style: none; /* IE and Edge */
-        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
-}
-
-button {
-    cursor: pointer !important;
 }

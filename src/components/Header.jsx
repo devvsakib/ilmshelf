@@ -1,10 +1,12 @@
-import { useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
     IconBook,
     IconSearch,
     IconChartBar,
-    IconPlus,
+    IconBooks,
+    IconBookmark,
+    IconDots,
     IconTarget,
     IconHeart,
     IconUsers,
@@ -12,182 +14,390 @@ import {
     IconUpload,
     IconEye,
     IconEyeOff,
-    IconMenu,
+    IconMenu2,
     IconX,
-} from '@tabler/icons-react'
-import { Button } from '@/components/ui/button'
+} from '@tabler/icons-react';
+import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuItem,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet'
-import { cn } from '@/lib/utils'
+    DropdownMenuSeparator,
+    DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
-// Keep the component signature and all functions/props unchanged
-export default function Header({ q, setQ, onExport, onImport, onOpenGoals, onOpenWishlist, onOpenLending, isCoverHidden, setIsCoverHidden }) {
-    const fileInputRef = useRef(null)
-    const [menuOpen, setMenuOpen] = useState(false)
-    // get path usapp
+export default function Header({
+    q,
+    setQ,
+    onExport,
+    onImport,
+    onOpenGoals,
+    onOpenWishlist,
+    onOpenLending,
+    isCoverHidden,
+    setIsCoverHidden,
+}) {
+    const fileInputRef = useRef(null);
+    const searchInputRef = useRef(null);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+    const { pathname } = useLocation();
 
-    const path = window.location.pathname;
-    const isUSApp = path === '/usapp';
-    if (isUSApp) {
-        return null; // Do not render the header on the /usapp route
-    }
+    // Press "/" anywhere (outside inputs) to focus catalog search
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (
+                e.key === '/' &&
+                !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)
+            ) {
+                e.preventDefault();
+                searchInputRef.current?.focus();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    const navItems = [
+        { label: 'Catalog', to: '/', icon: IconBooks },
+        { label: 'Shelves', to: '/shelves', icon: IconBookmark },
+        { label: 'Summary', to: '/summary', icon: IconChartBar },
+        { label: 'Analytics', to: '/analytics', icon: IconChartBar },
+    ];
+
+    const utilityItems = [
+        { label: 'Reading Goals', icon: IconTarget, action: onOpenGoals },
+        { label: 'Wishlist', icon: IconHeart, action: onOpenWishlist },
+        { label: 'Lending Tracker', icon: IconUsers, action: onOpenLending },
+    ];
 
     return (
-        <header className="sticky top-0 z-40 bg-white border-b shadow-sm">
+        <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16 gap-4">
-
-                    {/* left: brand + search (search collapses into sheet on mobile) */}
-                    <div className="flex items-center gap-4 min-w-0">
-                        <Link to="/" className="flex items-center gap-2 text-emerald-700 font-bold text-lg shrink-0">
-                            <IconBook size={26} />
-                            <span className="hidden sm:inline">IlmShelf</span>
+                    {/* Left: Editorial Wordmark & Navigation */}
+                    <div className="flex items-center gap-8 min-w-0">
+                        <Link
+                            to="/"
+                            className="flex items-center gap-2.5 text-foreground group shrink-0"
+                        >
+                            <div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary text-primary-foreground shadow-xs transition-transform duration-200 group-hover:scale-[1.03]">
+                                <IconBook size={18} stroke={2} />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-editorial text-lg font-semibold tracking-tight leading-none text-foreground">
+                                    IlmShelf
+                                </span>
+                                <span className="hidden sm:block text-[10px] uppercase tracking-[0.14em] text-muted-foreground mt-0.5">
+                                    Personal Archive
+                                </span>
+                            </div>
                         </Link>
 
-                        {/* Desktop Search */}
-                        <div className="hidden sm:flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border">
-                            <IconSearch size={18} className="text-gray-400" />
-                            <Input
-                                value={q}
-                                onChange={e => setQ(e.target.value)}
-                                placeholder="Search books, authors..."
-                                className="bg-transparent border-0 p-0 focus:ring-0 w-48 md:w-64 text-sm"
-                            />
-                        </div>
+                        {/* Primary Books Navigation */}
+                        <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
+                            {navItems.map(({ label, to, icon: Icon }) => {
+                                const isActive =
+                                    to === '/'
+                                        ? pathname === '/'
+                                        : pathname.startsWith(to);
 
-                        {/* Mobile search trigger (opens sheet) */}
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="sm:hidden">
-                                    <IconSearch />
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="top" className="p-4 [&>button]:hidden">
-                                <Input
-                                    value={q}
-                                    onChange={e => setQ(e.target.value)}
-                                    placeholder="Search books, authors..."
-                                    className="w-full"
-                                    autoFocus
-                                />
-                            </SheetContent>
-                        </Sheet>
+                                return (
+                                    <Link
+                                        key={to}
+                                        to={to}
+                                        className={cn(
+                                            'relative flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                                            isActive
+                                                ? 'text-primary bg-primary/8 font-semibold'
+                                                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70'
+                                        )}
+                                    >
+                                        <Icon size={16} stroke={1.85} />
+                                        <span>{label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </nav>
                     </div>
 
-                    {/* right: nav + actions */}
-                    <div className="flex items-center gap-2">
-                        <nav className="hidden md:flex items-center gap-4">
-                            <Link to="/" className="text-sm font-medium hover:text-emerald-700 transition-colors">Books</Link>
-                            <Link to="/shelves" className="text-sm font-medium hover:text-emerald-700 transition-colors">Shelves</Link>
-                            <Link to="/summary" className="text-sm font-medium hover:text-emerald-700 transition-colors flex items-center gap-1">
-                                <IconChartBar size={16} />
-                                <span className="hidden sm:inline">Summary</span>
-                            </Link>
-                        </nav>
+                    {/* Right: Search + Library Tools */}
+                    <div className="flex items-center gap-2.5">
+                        {/* Desktop Search Input */}
+                        <div className="hidden sm:flex items-center gap-2 bg-card hover:border-input focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/10 transition-all rounded-md px-3 h-9 border border-border">
+                            <IconSearch size={15} className="text-muted-foreground shrink-0" />
+                            <Input
+                                ref={searchInputRef}
+                                value={q}
+                                onChange={(e) => setQ(e.target.value)}
+                                placeholder="Search title, author..."
+                                className="bg-transparent border-0 p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0 w-44 md:w-60 text-sm placeholder:text-muted-foreground/75 shadow-none"
+                            />
+                            {q ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setQ('')}
+                                    className="text-muted-foreground hover:text-foreground p-0.5"
+                                    aria-label="Clear search"
+                                >
+                                    <IconX size={13} />
+                                </button>
+                            ) : (
+                                <kbd className="hidden lg:inline-flex items-center justify-center h-5 px-1.5 text-[10px] font-mono font-medium text-muted-foreground bg-secondary border border-border rounded">
+                                    /
+                                </kbd>
+                            )}
+                        </div>
 
-                        {/* Desktop: Dropdown (features) */}
+                        {/* Mobile Search Trigger */}
+                        <Sheet open={mobileSearchOpen} onOpenChange={setMobileSearchOpen}>
+                            <SheetTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="sm:hidden h-9 w-9 text-muted-foreground hover:text-foreground"
+                                    aria-label="Search books"
+                                >
+                                    <IconSearch size={18} />
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="top" className="bg-background border-b border-border p-4 [&>button]:hidden">
+                                <div className="flex items-center gap-2 bg-card border border-border rounded-md px-3 h-10">
+                                    <IconSearch size={16} className="text-muted-foreground" />
+                                    <Input
+                                        value={q}
+                                        onChange={(e) => setQ(e.target.value)}
+                                        placeholder="Search Bengali or English title, author..."
+                                        className="border-0 bg-transparent p-0 focus-visible:ring-0 shadow-none text-sm"
+                                        autoFocus
+                                    />
+                                    {q && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setQ('')}
+                                            className="text-xs text-muted-foreground hover:text-foreground"
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                            </SheetContent>
+                        </Sheet>
+
+                        {/* Desktop Library Tools Dropdown */}
                         <div className="hidden sm:block">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" title="Features">
-                                        <IconPlus />
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-9 px-2.5 bg-card border-border hover:bg-secondary/80 text-foreground gap-1.5 font-medium"
+                                        title="Library Tools & Archive Data"
+                                    >
+                                        <IconDots size={16} />
+                                        <span className="hidden lg:inline text-xs">Tools</span>
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48">
-                                    <DropdownMenuItem onClick={() => { onOpenGoals(); }}>
-                                        <div className="flex items-center gap-2 cursor-pointer"><IconTarget size={16} />Reading Goals</div>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => { onOpenWishlist(); }}>
-                                        <div className="flex items-center gap-2 cursor-pointer"><IconHeart size={16} />Wishlist</div>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => { onOpenLending(); }}>
-                                        <div className="flex items-center gap-2 cursor-pointer"><IconUsers size={16} />Lending Tracker</div>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => { setIsCoverHidden(!isCoverHidden); }}>
-                                        <div className="flex items-center gap-2 cursor-pointer">
-                                            {isCoverHidden ? <IconEye size={16} /> : <IconEyeOff size={16} />}
-                                            {isCoverHidden ? 'Show Covers' : 'Hide Covers'}
-                                        </div>
+                                <DropdownMenuContent
+                                    align="end"
+                                    className="w-52 bg-popover border-border text-popover-foreground shadow-md"
+                                >
+                                    <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
+                                        Reading Tools
+                                    </DropdownMenuLabel>
+
+                                    {utilityItems.map(({ label, icon: Icon, action }) => (
+                                        <DropdownMenuItem
+                                            key={label}
+                                            onClick={() => action?.()}
+                                            className="flex items-center gap-2.5 cursor-pointer py-2"
+                                        >
+                                            <Icon size={16} className="text-muted-foreground" />
+                                            <span>{label}</span>
+                                        </DropdownMenuItem>
+                                    ))}
+
+                                    <DropdownMenuItem
+                                        onClick={() => setIsCoverHidden(!isCoverHidden)}
+                                        className="flex items-center gap-2.5 cursor-pointer py-2"
+                                    >
+                                        {isCoverHidden ? (
+                                            <IconEye size={16} className="text-muted-foreground" />
+                                        ) : (
+                                            <IconEyeOff size={16} className="text-muted-foreground" />
+                                        )}
+                                        <span>{isCoverHidden ? 'Show Book Covers' : 'Hide Book Covers'}</span>
                                     </DropdownMenuItem>
 
-                                    <div className="border-t my-2" />
+                                    <DropdownMenuSeparator className="bg-border" />
 
-                                    <DropdownMenuItem onClick={() => { onExport(); }}>
-                                        <div className="flex items-center gap-2 cursor-pointer"><IconDownload size={16} />Export Data</div>
+                                    <DropdownMenuLabel className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
+                                        Archive Backup
+                                    </DropdownMenuLabel>
+
+                                    <DropdownMenuItem
+                                        onClick={() => onExport?.()}
+                                        className="flex items-center gap-2.5 cursor-pointer py-2"
+                                    >
+                                        <IconDownload size={16} className="text-muted-foreground" />
+                                        <span>Export JSON</span>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => { fileInputRef.current?.click(); }}>
-                                        <div className="flex items-center gap-2 cursor-pointer"><IconUpload size={16} />Import Data</div>
+                                    <DropdownMenuItem
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="flex items-center gap-2.5 cursor-pointer py-2"
+                                    >
+                                        <IconUpload size={16} className="text-muted-foreground" />
+                                        <span>Import JSON</span>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
 
-                        {/* Mobile: sheet menu (contains same items + nav) */}
-                        <Sheet>
+                        {/* Mobile Drawer Navigation */}
+                        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                             <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="sm:hidden">
-                                    <IconMenu />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="md:hidden h-9 w-9 text-foreground"
+                                    aria-label="Open library menu"
+                                >
+                                    <IconMenu2 size={20} />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="right" className="w-72 p-4 [&>button]:hidden">
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2 text-emerald-700">
-                                            <IconBook />
-                                            <span className="font-bold">IlmShelf</span>
+                            <SheetContent
+                                side="right"
+                                className="w-72 bg-background border-l border-border p-5 flex flex-col justify-between"
+                            >
+                                <div className="space-y-6">
+                                    {/* Drawer Header */}
+                                    <div className="flex items-center gap-2.5 pb-4 border-b border-border">
+                                        <div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary text-primary-foreground">
+                                            <IconBook size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="font-editorial font-semibold text-base leading-none">
+                                                IlmShelf
+                                            </p>
+                                            <p className="text-[11px] text-muted-foreground mt-1">
+                                                Personal Islamic Library
+                                            </p>
                                         </div>
                                     </div>
 
-                                    <nav className="flex flex-col gap-1 mt-2">
-                                        <Link to="/" className="px-2 py-2 rounded hover:bg-gray-50">Books</Link>
-                                        <Link to="/shelves" className="px-2 py-2 rounded hover:bg-gray-50">Shelves</Link>
-                                        <Link to="/summary" className="px-2 py-2 rounded hover:bg-gray-50 flex items-center gap-2"><IconChartBar />Summary</Link>
-                                    </nav>
+                                    {/* Navigation Links */}
+                                    <div className="space-y-1">
+                                        <p className="px-2 text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-2">
+                                            Library
+                                        </p>
+                                        {navItems.map(({ label, to, icon: Icon }) => {
+                                            const isActive =
+                                                to === '/'
+                                                    ? pathname === '/'
+                                                    : pathname.startsWith(to);
 
-                                    <div className="border-t my-2" />
+                                            return (
+                                                <Link
+                                                    key={to}
+                                                    to={to}
+                                                    onClick={() => setMobileMenuOpen(false)}
+                                                    className={cn(
+                                                        'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm font-medium transition-colors',
+                                                        isActive
+                                                            ? 'bg-primary/10 text-primary font-semibold'
+                                                            : 'text-foreground hover:bg-secondary'
+                                                    )}
+                                                >
+                                                    <Icon size={17} />
+                                                    <span>{label}</span>
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
 
-                                    <Button variant="ghost" className="justify-start" onClick={() => onOpenGoals()}>
-                                        <IconTarget />
-                                        <span className="ml-2">Reading Goals</span>
-                                    </Button>
-                                    <Button variant="ghost" className="justify-start" onClick={() => onOpenWishlist()}>
-                                        <IconHeart />
-                                        <span className="ml-2">Wishlist</span>
-                                    </Button>
-                                    <Button variant="ghost" className="justify-start" onClick={() => onOpenLending()}>
-                                        <IconUsers />
-                                        <span className="ml-2">Lending Tracker</span>
-                                    </Button>
-                                    <Button variant="ghost" className="justify-start" onClick={() => setIsCoverHidden(!isCoverHidden)}>
-                                        {isCoverHidden ? <IconEye /> : <IconEyeOff />}
-                                        <span className="ml-2">{isCoverHidden ? 'Show Covers' : 'Hide Covers'}</span>
-                                    </Button>
+                                    {/* Reading Tools */}
+                                    <div className="space-y-1 pt-2 border-t border-border">
+                                        <p className="px-2 text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-2">
+                                            Tools
+                                        </p>
+                                        {utilityItems.map(({ label, icon: Icon, action }) => (
+                                            <button
+                                                key={label}
+                                                type="button"
+                                                onClick={() => {
+                                                    setMobileMenuOpen(false);
+                                                    action?.();
+                                                }}
+                                                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm text-foreground hover:bg-secondary transition-colors text-left"
+                                            >
+                                                <Icon size={17} className="text-muted-foreground" />
+                                                <span>{label}</span>
+                                            </button>
+                                        ))}
 
-                                    <div className="border-t my-2" />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setIsCoverHidden(!isCoverHidden);
+                                                setMobileMenuOpen(false);
+                                            }}
+                                            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm text-foreground hover:bg-secondary transition-colors text-left"
+                                        >
+                                            {isCoverHidden ? (
+                                                <IconEye size={17} className="text-muted-foreground" />
+                                            ) : (
+                                                <IconEyeOff size={17} className="text-muted-foreground" />
+                                            )}
+                                            <span>{isCoverHidden ? 'Show Covers' : 'Hide Covers'}</span>
+                                        </button>
+                                    </div>
+                                </div>
 
-                                    <Button variant="ghost" className="justify-start" onClick={() => onExport()}>
-                                        <IconDownload />
-                                        <span className="ml-2">Export Data</span>
+                                {/* Footer Backup Actions */}
+                                <div className="pt-4 border-t border-border grid grid-cols-2 gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full bg-card border-border text-xs gap-1.5"
+                                        onClick={() => {
+                                            setMobileMenuOpen(false);
+                                            onExport?.();
+                                        }}
+                                    >
+                                        <IconDownload size={14} />
+                                        Export
                                     </Button>
-                                    <Button variant="ghost" className="justify-start" onClick={() => fileInputRef.current?.click()}>
-                                        <IconUpload />
-                                        <span className="ml-2">Import Data</span>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="w-full bg-card border-border text-xs gap-1.5"
+                                        onClick={() => {
+                                            setMobileMenuOpen(false);
+                                            fileInputRef.current?.click();
+                                        }}
+                                    >
+                                        <IconUpload size={14} />
+                                        Import
                                     </Button>
                                 </div>
                             </SheetContent>
                         </Sheet>
 
-                        {/* hidden file input remains unchanged */}
-                        <input ref={fileInputRef} type="file" accept=".json" onChange={onImport} className="hidden" />
+                        {/* Hidden JSON Import Input */}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".json"
+                            onChange={onImport}
+                            className="hidden"
+                        />
                     </div>
                 </div>
             </div>
         </header>
-    )
+    );
 }

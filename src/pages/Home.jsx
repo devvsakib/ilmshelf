@@ -1,38 +1,101 @@
-import BookList from "@/components/BookList";
-import { IconPlus } from "@tabler/icons-react";
+import { useNavigate } from 'react-router-dom';
+import { IconPlus, IconLoader2 } from '@tabler/icons-react';
+import { Button } from '@/components/ui/button';
+import BookList from '@/components/BookList';
 
-function Home({ filteredBooks, isCoverHidden, setIsAddingBook }) {
+function Home({ filteredBooks = [], loading = false, isCoverHidden, setIsAddingBook }) {
+  const navigate = useNavigate();
+
+  const totalCount = filteredBooks.length;
+  const completedCount = filteredBooks.filter(
+    (b) => (b.readStatus || '').toUpperCase() === 'COMPLETED'
+  ).length;
+
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      {/* Editorial Catalog Header */}
+      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 mb-6 border-b border-border">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">My Books</h1>
-          <p className="text-slate-600 mt-1">
-            {filteredBooks?.length} {filteredBooks?.length === 1 ? 'book' : 'books'} in collection
+          <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+            Personal Archive
+          </p>
+          <h1 className="font-editorial text-2xl sm:text-3xl font-semibold text-foreground tracking-tight mt-1">
+            Cataloged Volumes
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 tabular-nums">
+            {loading ? (
+              'Synchronizing library records...'
+            ) : (
+              <>
+                Showing <span className="font-mono font-semibold text-foreground">{totalCount}</span>{' '}
+                {totalCount === 1 ? 'volume' : 'volumes'}
+                {totalCount > 0 && (
+                  <>
+                    {' · '}
+                    <span className="font-mono font-medium text-primary">
+                      {completedCount}
+                    </span>{' '}
+                    completed
+                  </>
+                )}
+              </>
+            )}
           </p>
         </div>
-        <button
-          onClick={() => setIsAddingBook(true)}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-md"
-        >
-          <IconPlus size={20} />
-          Add Book
-        </button>
-      </div>
-      <BookList
-        books={filteredBooks}
-        onOpen={(id) => window.location.href = `/book/${id}`}
-        isCoverHidden={isCoverHidden}
-      />
 
-      <footer>
-        <p className="text-center text-sm text-slate-500 mt-12 mb-6">
-          &copy; {new Date().getFullYear()} ILMShelf. All rights reserved. |
-          <a className="ml-1" href="https://github.com/devvsakib/ilmshelf" target="_blank" rel="noopener noreferrer">GitHub</a> |
-          <a className="ml-1" href="https://devvsakib.vercel.app" target="_blank" rel="noopener noreferrer">Developed By Sakib Ahmed</a>
+        <Button
+          type="button"
+          onClick={() => setIsAddingBook(true)}
+          className="h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 text-xs sm:text-sm font-medium gap-1.5 self-start sm:self-auto shadow-2xs"
+        >
+          <IconPlus size={16} />
+          <span>Add Volume</span>
+        </Button>
+      </header>
+
+      {/* Main Catalog Grid / Ledger */}
+      {loading && totalCount === 0 ? (
+        <div className="py-20 flex flex-col items-center justify-center text-muted-foreground gap-2.5">
+          <IconLoader2 size={22} className="animate-spin text-primary" />
+          <span className="font-mono text-xs uppercase tracking-widest">
+            Loading Catalog...
+          </span>
+        </div>
+      ) : (
+        <BookList
+          books={filteredBooks}
+          onOpen={(id) => navigate(`/book/${id}`)}
+          isCoverHidden={isCoverHidden}
+        />
+      )}
+
+      {/* Colophon Footer */}
+      <footer className="mt-14 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+        <p>
+          &copy; {new Date().getFullYear()} <span className="font-editorial font-medium text-foreground">IlmShelf</span>. Personal Library Catalog.
         </p>
+        <div className="flex items-center gap-3">
+          <a
+            href="https://github.com/devvsakib/ilmshelf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground transition-colors"
+          >
+            GitHub
+          </a>
+          <span className="text-border">•</span>
+          <a
+            href="https://devvsakib.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-foreground transition-colors"
+          >
+            Developed by Sakib Ahmed
+          </a>
+        </div>
       </footer>
     </div>
-  )
+  );
 }
+
 export default Home;
