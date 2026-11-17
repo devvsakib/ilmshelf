@@ -24,16 +24,11 @@ import BookAppLayout from './pages/BookAppLayout';
 import FashionDemo from './pages/udyoktastudio/demo/FashionDemo';
 import HoneySeed from './pages/udyoktastudio/demo/HoneySeed';
 import { useBooks } from './hooks/useBooks';
+import { useShelves } from './hooks/useShelves';
 import { cn } from '@/lib/utils';
-
-const INITIAL_SHELVES = [
-  { id: 'general', name: 'General', description: 'Everyday reads', color: 'blue' },
-  { id: 'islamic', name: 'Islamic', description: 'Tafsir and Aqidah', color: 'emerald' },
-];
 
 export const uid = () => 'b' + Date.now() + Math.random().toString(36).slice(2, 9);
 
-// Archival Toast notification component
 function Toast({ message, type = 'info', onClose }) {
   useEffect(() => {
     const t = setTimeout(onClose, 3200);
@@ -83,7 +78,6 @@ function Toast({ message, type = 'info', onClose }) {
   );
 }
 
-// Renders IlmShelf Header on all book app routes (skips /usapp demo routes)
 function ConditionalHeader(props) {
   const { pathname } = useLocation();
   if (pathname.startsWith('/usapp')) return null;
@@ -103,6 +97,8 @@ export default function App() {
     adminMode: true,
   });
 
+  const { shelves, addShelf, updateShelf, deleteShelf } = useShelves();
+
   const [isCoverHidden, setIsCoverHidden] = useState(() => {
     try {
       const settings = JSON.parse(localStorage.getItem('ilmshelf_settings') || '{}');
@@ -112,7 +108,6 @@ export default function App() {
     }
   });
 
-  const [shelves] = useState(INITIAL_SHELVES);
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
   const [editingBookId, setEditingBookId] = useState(null);
@@ -125,7 +120,6 @@ export default function App() {
     setToast({ message, type });
   };
 
-  // Persist UI cover setting in localStorage
   useEffect(() => {
     try {
       const settings = JSON.parse(localStorage.getItem('ilmshelf_settings') || '{}');
@@ -136,7 +130,6 @@ export default function App() {
     }
   }, [isCoverHidden]);
 
-  // Show API load error if fetching fails
   useEffect(() => {
     if (error) {
       showToast(error, 'error');
@@ -185,7 +178,23 @@ export default function App() {
     }
   };
 
-  // Compatibility wrapper in case BookDetail calls setBooks directly
+  const handleAddShelf = async (payload) => {
+    const created = await addShelf(payload);
+    showToast(`Shelf "${created.name}" created!`, 'success');
+    return created;
+  };
+
+  const handleUpdateShelf = async (id, payload) => {
+    const updated = await updateShelf(id, payload);
+    showToast(`Shelf "${updated.name}" updated!`, 'success');
+    return updated;
+  };
+
+  const handleDeleteShelf = async (id) => {
+    await deleteShelf(id);
+    showToast('Shelf deleted', 'success');
+  };
+
   const handleSetBooks = async (updater) => {
     const nextBooks = typeof updater === 'function' ? updater(books) : updater;
     if (!Array.isArray(nextBooks)) return;
@@ -299,7 +308,15 @@ export default function App() {
               />
               <Route
                 path="shelves"
-                element={<ShelvesPage shelves={shelves} books={books} />}
+                element={
+                  <ShelvesPage
+                    shelves={shelves}
+                    books={books}
+                    onAddShelf={handleAddShelf}
+                    onUpdateShelf={handleUpdateShelf}
+                    onDeleteShelf={handleDeleteShelf}
+                  />
+                }
               />
               <Route
                 path="analytics"

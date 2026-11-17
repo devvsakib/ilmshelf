@@ -85,3 +85,44 @@ export const bookApi = {
         return data.url;
     },
 };
+
+export const shelfApi = {
+    async getAll() {
+        const res = await fetch(`${API_URL}/shelves.php`);
+        return handleResponse(res);
+    },
+
+    async create(payload) {
+        const res = await fetch(`${API_URL}/shelves.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': API_KEY,
+            },
+            body: JSON.stringify(payload),
+        });
+        return handleResponse(res);
+    },
+
+    async update(id, payload) {
+        const res = await fetch(`${API_URL}/shelves.php?id=${encodeURIComponent(id)}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': API_KEY,
+            },
+            body: JSON.stringify(payload),
+        });
+        return handleResponse(res);
+    },
+
+    async remove(id) {
+        const res = await fetch(`${API_URL}/shelves.php?id=${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+            headers: {
+                'X-API-Key': API_KEY,
+            },
+        });
+        return handleResponse(res);
+    },
+};
