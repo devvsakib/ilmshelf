@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { IconX, IconCheck, IconAlertCircle, IconInfoCircle } from '@tabler/icons-react';
+import { Analytics } from '@vercel/analytics/react';
 import Header from './components/Header';
 import ReadingGoals from './components/ReadingGoals';
 import Wishlist from './components/Wishlist';
@@ -394,6 +395,7 @@ export default function App() {
           )}
         </AnimatePresence>
       </div>
+      <Analytics />
     </BrowserRouter>
   );
 }
