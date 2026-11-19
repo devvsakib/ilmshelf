@@ -108,7 +108,7 @@ function StudyFolioSkeleton() {
     );
 }
 
-function BookDetail({ books = [], setBooks, deleteBook, openEdit, isLoading = false }) {
+function BookDetail({ books = [], setBooks, deleteBook, openEdit, isAdmin = false, isLoading = false }) {
     const { id } = useParams();
     const navigate = useNavigate();
     const [imgError, setImgError] = useState(false);
@@ -162,19 +162,15 @@ function BookDetail({ books = [], setBooks, deleteBook, openEdit, isLoading = fa
     const enTitle = typeof book.title === 'object' ? book.title?.en : null;
     const displayTitle = bnTitle || enTitle || 'Untitled Volume';
 
-    const updateStatus = (status) => {
-        setBooks((prev) =>
-            prev.map((x) => (x.id === book.id ? { ...x, readStatus: status } : x))
-        );
-    };
-
     const togglePrivacy = () => {
+        if (!isAdmin) return;
         setBooks((prev) =>
             prev.map((x) => (x.id === book.id ? { ...x, private: !x.private } : x))
         );
     };
 
     const updateNotes = (value) => {
+        if (!isAdmin) return;
         setBooks((prev) =>
             prev.map((x) => (x.id === book.id ? { ...x, notes: value } : x))
         );
@@ -202,6 +198,7 @@ function BookDetail({ books = [], setBooks, deleteBook, openEdit, isLoading = fa
     };
 
     const handleDelete = async () => {
+        if (!isAdmin) return;
         if (window.confirm(`Remove "${displayTitle}" from your archive?`)) {
             await deleteBook(book.id);
             navigate('/');
@@ -279,27 +276,31 @@ function BookDetail({ books = [], setBooks, deleteBook, openEdit, isLoading = fa
                         )}
                     </Button>
 
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEdit(book.id)}
-                        className="h-8 px-3 bg-card border-border text-xs gap-1.5"
-                    >
-                        <IconEdit size={14} />
-                        <span>Edit</span>
-                    </Button>
+                    {isAdmin && (
+                        <>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEdit(book.id)}
+                                className="h-8 px-3 bg-card border-border text-xs gap-1.5"
+                            >
+                                <IconEdit size={14} />
+                                <span>Edit</span>
+                            </Button>
 
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleDelete}
-                        className="h-8 px-2.5 bg-card border-border text-destructive hover:bg-destructive/10 hover:border-destructive/30"
-                        title="Delete volume"
-                    >
-                        <IconTrash size={14} />
-                    </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={handleDelete}
+                                className="h-8 px-2.5 bg-card border-border text-destructive hover:bg-destructive/10 hover:border-destructive/30"
+                                title="Delete volume"
+                            >
+                                <IconTrash size={14} />
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -417,14 +418,14 @@ function BookDetail({ books = [], setBooks, deleteBook, openEdit, isLoading = fa
                             </dl>
                         </header>
 
-                        {/* Interactive Status & Visibility Controls */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Status & Visibility Controls */}
+                        <div className={cn('grid grid-cols-1 gap-4', isAdmin && 'sm:grid-cols-2')}>
                             <div>
                                 <label className="block text-[11px] uppercase tracking-wider font-medium text-muted-foreground mb-1.5">
                                     Reading Status
                                 </label>
-                                <Select value={book.readStatus} onValueChange={updateStatus}>
-                                    <SelectTrigger className="w-full h-9 bg-background border-border text-sm font-medium">
+                                <Select value={book.readStatus} disabled>
+                                    <SelectTrigger className="w-full h-9 bg-background border-border text-sm font-medium disabled:opacity-80 disabled:cursor-not-allowed">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent className="bg-popover border-border">
@@ -450,33 +451,35 @@ function BookDetail({ books = [], setBooks, deleteBook, openEdit, isLoading = fa
                                 </Select>
                             </div>
 
-                            <div>
-                                <label className="block text-[11px] uppercase tracking-wider font-medium text-muted-foreground mb-1.5">
-                                    Archive Visibility
-                                </label>
-                                <button
-                                    type="button"
-                                    onClick={togglePrivacy}
-                                    className={cn(
-                                        'w-full h-9 px-3 border rounded-md flex items-center justify-between text-sm font-medium transition-colors',
-                                        book.private
-                                            ? 'bg-secondary/80 border-border text-foreground'
-                                            : 'bg-background border-border text-foreground hover:bg-secondary/50'
-                                    )}
-                                >
-                                    <span className="inline-flex items-center gap-2">
-                                        {book.private ? (
-                                            <IconEyeOff size={15} className="text-muted-foreground" />
-                                        ) : (
-                                            <IconEye size={15} className="text-primary" />
+                            {isAdmin && (
+                                <div>
+                                    <label className="block text-[11px] uppercase tracking-wider font-medium text-muted-foreground mb-1.5">
+                                        Archive Visibility
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={togglePrivacy}
+                                        className={cn(
+                                            'w-full h-9 px-3 border rounded-md flex items-center justify-between text-sm font-medium transition-colors',
+                                            book.private
+                                                ? 'bg-secondary/80 border-border text-foreground'
+                                                : 'bg-background border-border text-foreground hover:bg-secondary/50'
                                         )}
-                                        {book.private ? 'Private Record' : 'Public Record'}
-                                    </span>
-                                    <span className="text-[11px] text-muted-foreground">
-                                        Toggle
-                                    </span>
-                                </button>
-                            </div>
+                                    >
+                                        <span className="inline-flex items-center gap-2">
+                                            {book.private ? (
+                                                <IconEyeOff size={15} className="text-muted-foreground" />
+                                            ) : (
+                                                <IconEye size={15} className="text-primary" />
+                                            )}
+                                            {book.private ? 'Private Record' : 'Public Record'}
+                                        </span>
+                                        <span className="text-[11px] text-muted-foreground">
+                                            Toggle
+                                        </span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Bibliographic Metadata Hairline Ledger */}
@@ -520,29 +523,39 @@ function BookDetail({ books = [], setBooks, deleteBook, openEdit, isLoading = fa
                             </section>
                         )}
 
-                        {/* Editable Study Margin Notes */}
-                        <section className="space-y-1.5">
-                            <div className="flex items-center justify-between">
-                                <label
-                                    htmlFor="study-margin-notes"
-                                    className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-medium text-muted-foreground"
-                                >
-                                    <IconNotes size={13} className="text-ochre" />
-                                    <span>Personal Study Notes</span>
-                                </label>
-                                <span className="text-[11px] text-muted-foreground">
-                                    Auto-saved
-                                </span>
-                            </div>
-                            <textarea
-                                id="study-margin-notes"
-                                rows={3}
-                                value={book.notes || ''}
-                                onChange={(e) => updateNotes(e.target.value)}
-                                placeholder="Record key takeaways, chapter references, or reflections..."
-                                className="w-full font-bn-body text-sm text-foreground bg-background border border-border focus:border-primary/60 focus:ring-2 focus:ring-primary/10 rounded-md p-3.5 outline-none transition-all resize-y placeholder:text-muted-foreground/60"
-                            />
-                        </section>
+                        {/* Study Margin Notes (Editable for admin, read-only for visitors) */}
+                        {(isAdmin || book.notes) && (
+                            <section className="space-y-1.5">
+                                <div className="flex items-center justify-between">
+                                    <label
+                                        htmlFor="study-margin-notes"
+                                        className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-medium text-muted-foreground"
+                                    >
+                                        <IconNotes size={13} className="text-ochre" />
+                                        <span>Personal Study Notes</span>
+                                    </label>
+                                    {isAdmin && (
+                                        <span className="text-[11px] text-muted-foreground">
+                                            Auto-saved
+                                        </span>
+                                    )}
+                                </div>
+                                {isAdmin ? (
+                                    <textarea
+                                        id="study-margin-notes"
+                                        rows={3}
+                                        value={book.notes || ''}
+                                        onChange={(e) => updateNotes(e.target.value)}
+                                        placeholder="Record key takeaways, chapter references, or reflections..."
+                                        className="w-full font-bn-body text-sm text-foreground bg-background border border-border focus:border-primary/60 focus:ring-2 focus:ring-primary/10 rounded-md p-3.5 outline-none transition-all resize-y placeholder:text-muted-foreground/60"
+                                    />
+                                ) : (
+                                    <p className="font-bn-body text-sm text-foreground/90 leading-relaxed bg-secondary/45 border border-border rounded-md p-4 whitespace-pre-line">
+                                        {book.notes}
+                                    </p>
+                                )}
+                            </section>
+                        )}
                     </div>
                 </div>
             </article>

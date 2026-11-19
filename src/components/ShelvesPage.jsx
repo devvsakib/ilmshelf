@@ -61,6 +61,7 @@ function getShelfAccent(color) {
 function ShelvesPage({
   shelves = [],
   books = [],
+  isAdmin = false,
   onAddShelf,
   onUpdateShelf,
   onDeleteShelf,
@@ -82,6 +83,7 @@ function ShelvesPage({
   const totalCatalogValue = books.reduce((sum, b) => sum + (Number(b.price) || 0), 0);
 
   const openCreateModal = () => {
+    if (!isAdmin) return;
     setEditingShelf(null);
     setForm({ name: '', description: '', color: 'emerald' });
     setFormError('');
@@ -90,6 +92,7 @@ function ShelvesPage({
 
   const openEditModal = (e, shelf) => {
     e.stopPropagation();
+    if (!isAdmin) return;
     setEditingShelf(shelf);
     setForm({
       name: shelf.name || '',
@@ -102,6 +105,7 @@ function ShelvesPage({
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!form.name.trim()) {
       setFormError('Shelf name is required');
       return;
@@ -124,7 +128,7 @@ function ShelvesPage({
   };
 
   const handleConfirmDelete = async () => {
-    if (!shelfToDelete) return;
+    if (!isAdmin || !shelfToDelete) return;
     try {
       setDeleting(true);
       await onDeleteShelf?.(shelfToDelete.id);
@@ -174,19 +178,21 @@ function ShelvesPage({
             <div className="hidden sm:block">
               <span className="text-muted-foreground">Valuation: </span>
               <span className="font-mono font-semibold text-primary tabular-nums">
-                ৳{totalCatalogValue.toLocaleString()}
+                {isAdmin ? `৳${totalCatalogValue.toLocaleString()}` : '--'}
               </span>
             </div>
           </div>
 
-          <Button
-            type="button"
-            onClick={openCreateModal}
-            className="h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 text-xs sm:text-sm font-medium gap-1.5 shadow-2xs"
-          >
-            <IconPlus size={16} />
-            <span>New Shelf</span>
-          </Button>
+          {isAdmin && (
+            <Button
+              type="button"
+              onClick={openCreateModal}
+              className="h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 text-xs sm:text-sm font-medium gap-1.5 shadow-2xs"
+            >
+              <IconPlus size={16} />
+              <span>New Shelf</span>
+            </Button>
+          )}
         </div>
       </header>
 
@@ -200,16 +206,20 @@ function ShelvesPage({
             No shelves configured yet
           </h2>
           <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-5">
-            Create subject shelves to categorize your library volumes.
+            {isAdmin
+              ? 'Create subject shelves to categorize your library volumes.'
+              : 'No subject shelves have been published yet.'}
           </p>
-          <Button
-            type="button"
-            onClick={openCreateModal}
-            className="h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium gap-1.5"
-          >
-            <IconPlus size={15} />
-            <span>Create First Shelf</span>
-          </Button>
+          {isAdmin && (
+            <Button
+              type="button"
+              onClick={openCreateModal}
+              className="h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium gap-1.5"
+            >
+              <IconPlus size={15} />
+              <span>Create First Shelf</span>
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
@@ -247,30 +257,31 @@ function ShelvesPage({
                     </span>
 
                     <div className="flex items-center gap-1.5">
-                      {/* Edit & Delete Controls */}
-                      <div className="flex items-center gap-0.5 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                        <button
-                          type="button"
-                          onClick={(e) => openEditModal(e, shelf)}
-                          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                          title="Edit shelf"
-                          aria-label={`Edit ${shelf.name}`}
-                        >
-                          <IconEdit size={14} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShelfToDelete(shelf);
-                          }}
-                          className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                          title="Delete shelf"
-                          aria-label={`Delete ${shelf.name}`}
-                        >
-                          <IconTrash size={14} />
-                        </button>
-                      </div>
+                      {isAdmin && (
+                        <div className="flex items-center gap-0.5 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={(e) => openEditModal(e, shelf)}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                            title="Edit shelf"
+                            aria-label={`Edit ${shelf.name}`}
+                          >
+                            <IconEdit size={14} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShelfToDelete(shelf);
+                            }}
+                            className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                            title="Delete shelf"
+                            aria-label={`Delete ${shelf.name}`}
+                          >
+                            <IconTrash size={14} />
+                          </button>
+                        </div>
+                      )}
 
                       <div
                         className={cn(
@@ -334,7 +345,7 @@ function ShelvesPage({
 
                     <div className="text-right">
                       <span className="font-mono text-base font-semibold text-primary tabular-nums">
-                        ৳{totalValue.toLocaleString()}
+                        {isAdmin ? `৳${totalValue.toLocaleString()}` : '--'}
                       </span>
                       <span className="block text-[10px] uppercase tracking-wider text-muted-foreground">
                         Value
@@ -349,172 +360,176 @@ function ShelvesPage({
       )}
 
       {/* Create / Edit Shelf Modal */}
-      <Dialog open={modalOpen} onOpenChange={(open) => !saving && setModalOpen(open)}>
-        <DialogContent className="max-w-md w-[94vw] p-0 gap-0 bg-card border-border overflow-hidden shadow-xl">
-          <DialogHeader className="px-6 py-4 bg-background border-b border-border text-left">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-              {editingShelf ? 'Update Category' : 'New Category'}
-            </p>
-            <DialogTitle className="font-editorial text-xl font-semibold text-foreground mt-0.5">
-              {editingShelf ? 'Edit Shelf' : 'Create Custom Shelf'}
-            </DialogTitle>
-            <DialogDescription className="sr-only">
-              Configure shelf title, description, and accent color.
-            </DialogDescription>
-          </DialogHeader>
+      {isAdmin && (
+        <Dialog open={modalOpen} onOpenChange={(open) => !saving && setModalOpen(open)}>
+          <DialogContent className="max-w-md w-[94vw] p-0 gap-0 bg-card border-border overflow-hidden shadow-xl">
+            <DialogHeader className="px-6 py-4 bg-background border-b border-border text-left">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                {editingShelf ? 'Update Category' : 'New Category'}
+              </p>
+              <DialogTitle className="font-editorial text-xl font-semibold text-foreground mt-0.5">
+                {editingShelf ? 'Edit Shelf' : 'Create Custom Shelf'}
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                Configure shelf title, description, and accent color.
+              </DialogDescription>
+            </DialogHeader>
 
-          <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
-            {formError && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium">
-                <IconAlertCircle size={14} className="shrink-0" />
-                <span>{formError}</span>
+            <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
+              {formError && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium">
+                  <IconAlertCircle size={14} className="shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
+              <div>
+                <label className="block font-bn-body text-xs font-medium text-foreground mb-1.5">
+                  Shelf Name (শেলফের নাম) <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  value={form.name}
+                  onChange={(e) => {
+                    setFormError('');
+                    setForm((prev) => ({ ...prev, name: e.target.value }));
+                  }}
+                  placeholder="যেমন: হাদীস ও উলূমুল হাদীস বা History"
+                  className="font-bn-title h-9 bg-background border-border"
+                  autoFocus
+                />
               </div>
-            )}
 
-            <div>
-              <label className="block font-bn-body text-xs font-medium text-foreground mb-1.5">
-                Shelf Name (শেলফের নাম) <span className="text-destructive">*</span>
-              </label>
-              <Input
-                value={form.name}
-                onChange={(e) => {
-                  setFormError('');
-                  setForm((prev) => ({ ...prev, name: e.target.value }));
-                }}
-                placeholder="যেমন: হাদীস ও উলূমুল হাদীস বা History"
-                className="font-bn-title h-9 bg-background border-border"
-                autoFocus
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                Description
-              </label>
-              <Textarea
-                value={form.description}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, description: e.target.value }))
-                }
-                rows={2}
-                placeholder="Brief note about what belongs on this shelf..."
-                className="font-bn-body bg-background border-border text-sm resize-y"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-muted-foreground mb-2">
-                Bookmark Accent
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(SHELF_ACCENTS).map(([key, meta]) => {
-                  const active = form.color === key;
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() =>
-                        setForm((prev) => ({ ...prev, color: key }))
-                      }
-                      className={cn(
-                        'inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border text-xs font-medium transition-colors',
-                        active
-                          ? 'bg-secondary border-primary text-foreground ring-1 ring-primary/30'
-                          : 'bg-background border-border text-muted-foreground hover:text-foreground'
-                      )}
-                    >
-                      <span
-                        className={cn('w-2.5 h-2.5 rounded-full', meta.dot)}
-                      />
-                      <span>{meta.label}</span>
-                    </button>
-                  );
-                })}
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-1.5">
+                  Description
+                </label>
+                <Textarea
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, description: e.target.value }))
+                  }
+                  rows={2}
+                  placeholder="Brief note about what belongs on this shelf..."
+                  className="font-bn-body bg-background border-border text-sm resize-y"
+                />
               </div>
-            </div>
 
-            <DialogFooter className="pt-3 border-t border-border flex-row justify-end gap-2">
-              <DialogClose asChild>
+              <div>
+                <label className="block text-xs font-medium text-muted-foreground mb-2">
+                  Bookmark Accent
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(SHELF_ACCENTS).map(([key, meta]) => {
+                    const active = form.color === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() =>
+                          setForm((prev) => ({ ...prev, color: key }))
+                        }
+                        className={cn(
+                          'inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md border text-xs font-medium transition-colors',
+                          active
+                            ? 'bg-secondary border-primary text-foreground ring-1 ring-primary/30'
+                            : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                        )}
+                      >
+                        <span
+                          className={cn('w-2.5 h-2.5 rounded-full', meta.dot)}
+                        />
+                        <span>{meta.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <DialogFooter className="pt-3 border-t border-border flex-row justify-end gap-2">
+                <DialogClose asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={saving}
+                    className="h-9 px-4 bg-background border-border text-xs"
+                  >
+                    Cancel
+                  </Button>
+                </DialogClose>
                 <Button
-                  type="button"
-                  variant="outline"
+                  type="submit"
                   disabled={saving}
-                  className="h-9 px-4 bg-background border-border text-xs"
+                  className="h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium gap-1.5"
                 >
-                  Cancel
+                  {saving ? (
+                    <IconLoader2 size={14} className="animate-spin" />
+                  ) : (
+                    <IconCheck size={14} />
+                  )}
+                  <span>{editingShelf ? 'Save Changes' : 'Create Shelf'}</span>
                 </Button>
-              </DialogClose>
-              <Button
-                type="submit"
-                disabled={saving}
-                className="h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-medium gap-1.5"
-              >
-                {saving ? (
-                  <IconLoader2 size={14} className="animate-spin" />
-                ) : (
-                  <IconCheck size={14} />
-                )}
-                <span>{editingShelf ? 'Save Changes' : 'Create Shelf'}</span>
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Delete Shelf Confirmation Modal */}
-      <Dialog
-        open={Boolean(shelfToDelete)}
-        onOpenChange={(open) => !open && !deleting && setShelfToDelete(null)}
-      >
-        <DialogContent className="max-w-md w-[94vw] bg-card border-border">
-          <DialogHeader>
-            <DialogTitle className="font-editorial text-lg font-semibold text-foreground">
-              Delete &ldquo;{shelfToDelete?.name}&rdquo;?
-            </DialogTitle>
-            <DialogDescription className="text-xs sm:text-sm text-muted-foreground pt-1">
-              {affectedBooksCount > 0 ? (
-                <>
-                  This shelf currently contains{' '}
-                  <strong className="text-foreground font-mono">
-                    {affectedBooksCount}
-                  </strong>{' '}
-                  {affectedBooksCount === 1 ? 'volume' : 'volumes'}. The books
-                  themselves will remain in your catalog, but they will become
-                  unassigned until moved to another shelf.
-                </>
-              ) : (
-                'This shelf has no volumes assigned to it and will be permanently removed.'
-              )}
-            </DialogDescription>
-          </DialogHeader>
+      {isAdmin && (
+        <Dialog
+          open={Boolean(shelfToDelete)}
+          onOpenChange={(open) => !open && !deleting && setShelfToDelete(null)}
+        >
+          <DialogContent className="max-w-md w-[94vw] bg-card border-border">
+            <DialogHeader>
+              <DialogTitle className="font-editorial text-lg font-semibold text-foreground">
+                Delete &ldquo;{shelfToDelete?.name}&rdquo;?
+              </DialogTitle>
+              <DialogDescription className="text-xs sm:text-sm text-muted-foreground pt-1">
+                {affectedBooksCount > 0 ? (
+                  <>
+                    This shelf currently contains{' '}
+                    <strong className="text-foreground font-mono">
+                      {affectedBooksCount}
+                    </strong>{' '}
+                    {affectedBooksCount === 1 ? 'volume' : 'volumes'}. The books
+                    themselves will remain in your catalog, but they will become
+                    unassigned until moved to another shelf.
+                  </>
+                ) : (
+                  'This shelf has no volumes assigned to it and will be permanently removed.'
+                )}
+              </DialogDescription>
+            </DialogHeader>
 
-          <DialogFooter className="pt-2 flex-row justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={deleting}
-              onClick={() => setShelfToDelete(null)}
-              className="h-9 px-4 bg-background border-border text-xs"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={deleting}
-              onClick={handleConfirmDelete}
-              className="h-9 px-4 text-xs font-medium gap-1.5"
-            >
-              {deleting ? (
-                <IconLoader2 size={14} className="animate-spin" />
-              ) : (
-                <IconTrash size={14} />
-              )}
-              <span>Delete Shelf</span>
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="pt-2 flex-row justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={deleting}
+                onClick={() => setShelfToDelete(null)}
+                className="h-9 px-4 bg-background border-border text-xs"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={deleting}
+                onClick={handleConfirmDelete}
+                className="h-9 px-4 text-xs font-medium gap-1.5"
+              >
+                {deleting ? (
+                  <IconLoader2 size={14} className="animate-spin" />
+                ) : (
+                  <IconTrash size={14} />
+                )}
+                <span>Delete Shelf</span>
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

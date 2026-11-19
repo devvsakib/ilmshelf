@@ -12,7 +12,7 @@ const ARCHIVAL_CHART_COLORS = [
 ];
 
 /* Horizontal bar chart for expenditure by shelf */
-function MoneyByShelf({ data }) {
+function MoneyByShelf({ data, isAdmin = false }) {
   const max = Math.max(...data.map((d) => d.total), 1);
 
   if (!data.length) {
@@ -28,13 +28,13 @@ function MoneyByShelf({ data }) {
               {d.name}
             </span>
             <span className="font-mono text-xs font-semibold text-foreground tabular-nums shrink-0">
-              ৳{d.total.toLocaleString()}
+              {isAdmin ? `৳${d.total.toLocaleString()}` : '--'}
             </span>
           </div>
           <div className="bg-secondary border border-border/60 rounded-full h-2.5 overflow-hidden">
             <div
               className="h-full rounded-full bg-primary transition-all duration-500"
-              style={{ width: `${(d.total / max) * 100}%` }}
+              style={{ width: isAdmin ? `${(d.total / max) * 100}%` : '0%' }}
             />
           </div>
         </div>
@@ -140,7 +140,7 @@ function VerticalBarChart({ data }) {
   );
 }
 
-export default function AnalyticsPage({ books = [], shelves = [] }) {
+export default function AnalyticsPage({ books = [], shelves = [], isAdmin = false }) {
   const moneyByShelf = useMemo(() => {
     const map = {};
     shelves.forEach((s) => (map[s.id] = { name: s.name, total: 0 }));
@@ -210,10 +210,10 @@ export default function AnalyticsPage({ books = [], shelves = [] }) {
                 </p>
               </div>
               <span className="font-mono text-xs font-semibold text-primary tabular-nums">
-                Total: ৳{totalSpent.toLocaleString()}
+                Total: {isAdmin ? `৳${totalSpent.toLocaleString()}` : '--'}
               </span>
             </div>
-            <MoneyByShelf data={moneyByShelf} />
+            <MoneyByShelf data={moneyByShelf} isAdmin={isAdmin} />
           </CardContent>
         </Card>
 

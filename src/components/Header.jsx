@@ -17,6 +17,8 @@ import {
     IconMenu2,
     IconX,
     IconUser,
+    IconLockOpen,
+    IconLock,
 } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,6 +43,8 @@ export default function Header({
     onOpenLending,
     isCoverHidden,
     setIsCoverHidden,
+    isAdmin,
+    onOpenAdmin,
 }) {
     const fileInputRef = useRef(null);
     const searchInputRef = useRef(null);
@@ -388,6 +392,17 @@ export default function Header({
                                 </div>
                             </SheetContent>
                         </Sheet>
+                        <button
+                            type="button"
+                            onClick={onOpenAdmin}
+                            title={isAdmin ? 'Admin Unlocked (Click to Lock)' : 'Unlock Admin Mode'}
+                            className={`p-2 rounded-lg border transition-colors ${isAdmin
+                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                }`}
+                        >
+                            {isAdmin ? <IconLockOpen size={18} /> : <IconLock size={18} />}
+                        </button>
 
                         {/* Hidden JSON Import Input */}
                         <input

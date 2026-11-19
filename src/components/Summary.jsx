@@ -9,7 +9,7 @@ import {
 } from '@tabler/icons-react';
 import { cn } from '@/lib/utils';
 
-function SummaryPage({ books = [] }) {
+function SummaryPage({ books = [], isAdmin = false }) {
     const totalBooks = books.length;
     const totalSpent = books.reduce((sum, b) => sum + (Number(b.price) || 0), 0);
     const totalPages = books.reduce((sum, b) => sum + (Number(b.pages) || 0), 0);
@@ -73,8 +73,8 @@ function SummaryPage({ books = [] }) {
         },
         {
             label: 'Archive Valuation',
-            value: `৳${totalSpent.toLocaleString()}`,
-            caption: `Avg ৳${avgPrice.toLocaleString()} per volume`,
+            value: isAdmin ? `৳${totalSpent.toLocaleString()}` : '--',
+            caption: isAdmin ? `Avg ৳${avgPrice.toLocaleString()} per volume` : 'Avg -- per volume',
             icon: IconCoin,
             accent: true,
         },

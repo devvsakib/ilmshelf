@@ -1,16 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
-import { bookApi } from '../services/bookApi';
+import { bookApi, authStorage } from '../services/bookApi';
 
-// Module-level cache & in-flight request tracker shared across route changes
 const booksCache = new Map();
 const inFlightRequests = new Map();
 
-function getCacheKey({ shelfId, adminMode }) {
-    return `${shelfId || 'all'}_${adminMode ? 'admin' : 'public'}`;
+function getCacheKey(shelfId, isAdmin) {
+    return `${shelfId || 'all'}_${isAdmin ? 'admin' : 'public'}`;
 }
 
-export function useBooks({ shelfId, adminMode = false } = {}) {
-    const cacheKey = getCacheKey({ shelfId, adminMode });
+export function useBooks({ shelfId, isAdmin = authStorage.isLoggedIn() } = {}) {
+    const cacheKey = getCacheKey(shelfId, isAdmin);
 
     const [books, setBooks] = useState(() => booksCache.get(cacheKey) || []);
     const [loading, setLoading] = useState(() => !booksCache.has(cacheKey));
@@ -18,36 +17,37 @@ export function useBooks({ shelfId, adminMode = false } = {}) {
 
     const loadBooks = useCallback(
         async (force = false) => {
-            if (!force && booksCache.has(cacheKey)) {
-                setBooks(booksCache.get(cacheKey));
+            const currentKey = getCacheKey(shelfId, isAdmin);
+
+            if (!force && booksCache.has(currentKey)) {
+                setBooks(booksCache.get(currentKey));
                 setLoading(false);
-                return booksCache.get(cacheKey);
+                return booksCache.get(currentKey);
             }
 
             try {
                 setLoading(true);
                 setError(null);
 
-                // Deduplicate concurrent identical requests
-                let requestPromise = inFlightRequests.get(cacheKey);
+                let requestPromise = inFlightRequests.get(currentKey);
                 if (!requestPromise || force) {
-                    requestPromise = bookApi.getAll({ shelfId, adminMode });
-                    inFlightRequests.set(cacheKey, requestPromise);
+                    requestPromise = bookApi.getAll({ shelfId });
+                    inFlightRequests.set(currentKey, requestPromise);
                 }
 
                 const data = await requestPromise;
-                booksCache.set(cacheKey, data);
+                booksCache.set(currentKey, data);
                 setBooks(data);
                 return data;
             } catch (err) {
                 setError(err.message || 'Failed to load books');
                 throw err;
             } finally {
-                inFlightRequests.delete(cacheKey);
+                inFlightRequests.delete(currentKey);
                 setLoading(false);
             }
         },
-        [cacheKey, shelfId, adminMode]
+        [shelfId, isAdmin]
     );
 
     useEffect(() => {
@@ -55,10 +55,11 @@ export function useBooks({ shelfId, adminMode = false } = {}) {
     }, [loadBooks]);
 
     const syncCacheAndState = (updater) => {
+        const currentKey = getCacheKey(shelfId, isAdmin);
         setBooks((prev) => {
             const next = typeof updater === 'function' ? updater(prev) : updater;
             booksCache.clear();
-            booksCache.set(cacheKey, next);
+            booksCache.set(currentKey, next);
             return next;
         });
     };
@@ -71,8 +72,6 @@ export function useBooks({ shelfId, adminMode = false } = {}) {
 
         const newRecord = { ...payload, cover: coverUrl };
         const previousBooks = books;
-
-        // Optimistic insert
         syncCacheAndState((prev) => [newRecord, ...prev]);
 
         try {
@@ -96,8 +95,6 @@ export function useBooks({ shelfId, adminMode = false } = {}) {
 
         const updatedPayload = { ...payload, id, cover: coverUrl };
         const previousBooks = books;
-
-        // Optimistic update
         syncCacheAndState((prev) =>
             prev.map((b) => (b.id === id ? { ...b, ...updatedPayload } : b))
         );
@@ -117,8 +114,6 @@ export function useBooks({ shelfId, adminMode = false } = {}) {
 
     const deleteBook = async (id) => {
         const previousBooks = books;
-
-        // Optimistic delete
         syncCacheAndState((prev) => prev.filter((book) => book.id !== id));
 
         try {
@@ -129,11 +124,16 @@ export function useBooks({ shelfId, adminMode = false } = {}) {
         }
     };
 
+    const refetch = useCallback(() => {
+        booksCache.clear();
+        return loadBooks(true);
+    }, [loadBooks]);
+
     return {
         books,
         loading,
         error,
-        refetch: () => loadBooks(true),
+        refetch,
         addBook,
         updateBook,
         deleteBook,

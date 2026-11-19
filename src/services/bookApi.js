@@ -1,8 +1,25 @@
-const API_URL = import.meta.env.VITE_API_BASE_URL;
-const API_KEY = import.meta.env.VITE_API_KEY;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://api.addeenweb.com').replace(/\/$/, '');
+const TOKEN_STORAGE_KEY = 'ilmshelf_admin_token';
+
+export const authStorage = {
+    getToken: () => localStorage.getItem(TOKEN_STORAGE_KEY),
+    setToken: (token) => localStorage.setItem(TOKEN_STORAGE_KEY, token),
+    clearToken: () => localStorage.removeItem(TOKEN_STORAGE_KEY),
+    isLoggedIn: () => Boolean(localStorage.getItem(TOKEN_STORAGE_KEY)),
+};
+
+function getAuthHeaders(extra = {}) {
+    const token = authStorage.getToken();
+    return token
+        ? { ...extra, Authorization: `Bearer ${token}` }
+        : extra;
+}
 
 async function handleResponse(res) {
     const data = await res.json().catch(() => ({}));
+    if (res.status === 401) {
+        authStorage.clearToken();
+    }
     if (!res.ok) {
         throw new Error(data.error || `Request failed with status ${res.status}`);
     }
@@ -10,25 +27,40 @@ async function handleResponse(res) {
 }
 
 export const bookApi = {
-    // Fetch all books (pass adminMode = true to include private books)
-    async getAll({ shelfId, adminMode = false } = {}) {
+    // Admin login -> stores 30-day signed token
+    async login(password) {
+        const res = await fetch(`${API_URL}/login.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password }),
+        });
+        const data = await handleResponse(res);
+        authStorage.setToken(data.token);
+        return data;
+    },
+
+    logout() {
+        authStorage.clearToken();
+    },
+
+    // Fetch all books (automatically includes private books when admin token is present)
+    async getAll({ shelfId } = {}) {
         const url = new URL(`${API_URL}/index.php`);
         if (shelfId) {
             url.searchParams.set('shelfId', shelfId);
         }
 
-        const headers = {};
-        if (adminMode && API_KEY) {
-            headers['X-API-Key'] = API_KEY;
-        }
-
-        const res = await fetch(url.toString(), { headers });
+        const res = await fetch(url.toString(), {
+            headers: getAuthHeaders(),
+        });
         return handleResponse(res);
     },
 
     // Fetch a single book by ID (e.g., "b1")
     async getById(id) {
-        const res = await fetch(`${API_URL}/index.php?id=${encodeURIComponent(id)}`);
+        const res = await fetch(`${API_URL}/index.php?id=${encodeURIComponent(id)}`, {
+            headers: getAuthHeaders(),
+        });
         return handleResponse(res);
     },
 
@@ -36,10 +68,7 @@ export const bookApi = {
     async create(payload) {
         const res = await fetch(`${API_URL}/index.php`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': API_KEY,
-            },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload),
         });
         return handleResponse(res);
@@ -49,10 +78,7 @@ export const bookApi = {
     async update(id, payload) {
         const res = await fetch(`${API_URL}/index.php?id=${encodeURIComponent(id)}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': API_KEY,
-            },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload),
         });
         return handleResponse(res);
@@ -62,9 +88,7 @@ export const bookApi = {
     async remove(id) {
         const res = await fetch(`${API_URL}/index.php?id=${encodeURIComponent(id)}`, {
             method: 'DELETE',
-            headers: {
-                'X-API-Key': API_KEY,
-            },
+            headers: getAuthHeaders(),
         });
         return handleResponse(res);
     },
@@ -76,9 +100,7 @@ export const bookApi = {
 
         const res = await fetch(`${API_URL}/upload.php`, {
             method: 'POST',
-            headers: {
-                'X-API-Key': API_KEY,
-            },
+            headers: getAuthHeaders(),
             body: formData,
         });
         const data = await handleResponse(res);
@@ -88,17 +110,16 @@ export const bookApi = {
 
 export const shelfApi = {
     async getAll() {
-        const res = await fetch(`${API_URL}/shelves.php`);
+        const res = await fetch(`${API_URL}/shelves.php`, {
+            headers: getAuthHeaders(),
+        });
         return handleResponse(res);
     },
 
     async create(payload) {
         const res = await fetch(`${API_URL}/shelves.php`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': API_KEY,
-            },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload),
         });
         return handleResponse(res);
@@ -107,10 +128,7 @@ export const shelfApi = {
     async update(id, payload) {
         const res = await fetch(`${API_URL}/shelves.php?id=${encodeURIComponent(id)}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': API_KEY,
-            },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload),
         });
         return handleResponse(res);
@@ -119,9 +137,7 @@ export const shelfApi = {
     async remove(id) {
         const res = await fetch(`${API_URL}/shelves.php?id=${encodeURIComponent(id)}`, {
             method: 'DELETE',
-            headers: {
-                'X-API-Key': API_KEY,
-            },
+            headers: getAuthHeaders(),
         });
         return handleResponse(res);
     },

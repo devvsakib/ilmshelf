@@ -21,6 +21,8 @@ import BookAppLayout from './pages/BookAppLayout';
 import { useBooks } from './hooks/useBooks';
 import { useShelves } from './hooks/useShelves';
 import { cn } from '@/lib/utils';
+import { authStorage } from './services/bookApi';
+import AdminLoginModal from './components/AdminLoginModal';
 
 export const uid = () => 'b' + Date.now() + Math.random().toString(36).slice(2, 9);
 
@@ -74,6 +76,8 @@ function Toast({ message, type = 'info', onClose }) {
 }
 
 export default function App() {
+  const [isAdmin, setIsAdmin] = useState(() => authStorage.isLoggedIn());
+
   const {
     books,
     loading,
@@ -82,9 +86,7 @@ export default function App() {
     updateBook,
     deleteBook: removeBookFromApi,
     refetch,
-  } = useBooks({
-    adminMode: true,
-  });
+  } = useBooks({ isAdmin });
 
   const { shelves, addShelf, updateShelf, deleteShelf } = useShelves();
 
@@ -104,6 +106,13 @@ export default function App() {
   const [showGoals, setShowGoals] = useState(false);
   const [showWishlist, setShowWishlist] = useState(false);
   const [showLending, setShowLending] = useState(false);
+  const [showAdminModal, setShowAdminModal] = useState(false);
+
+  const handleAuthChange = async (loggedIn) => {
+    setIsAdmin(loggedIn);
+    await refetch();
+    showToast(loggedIn ? 'Admin mode unlocked' : 'Admin mode locked', 'success');
+  };
 
   const showToast = (message, type = 'info') => {
     setToast({ message, type });
@@ -267,6 +276,8 @@ export default function App() {
           onOpenLending={() => setShowLending(true)}
           isCoverHidden={isCoverHidden}
           setIsCoverHidden={setIsCoverHidden}
+          isAdmin={isAdmin}
+          onOpenAdmin={() => setShowAdminModal(true)}
         />
 
         <main className="pb-8">
@@ -281,6 +292,7 @@ export default function App() {
                     loading={loading}
                     isCoverHidden={isCoverHidden}
                     setIsAddingBook={setIsAddingBook}
+                    isAdmin={isAdmin}
                   />
                 }
               />
@@ -292,6 +304,7 @@ export default function App() {
                     setBooks={handleSetBooks}
                     deleteBook={deleteBook}
                     openEdit={setEditingBookId}
+                    isAdmin={isAdmin}
                   />
                 }
               />
@@ -304,12 +317,13 @@ export default function App() {
                     onAddShelf={handleAddShelf}
                     onUpdateShelf={handleUpdateShelf}
                     onDeleteShelf={handleDeleteShelf}
+                    isAdmin={isAdmin}
                   />
                 }
               />
               <Route
                 path="analytics"
-                element={<AnalyticsPage shelves={shelves} books={books} />}
+                element={<AnalyticsPage shelves={shelves} books={books} isAdmin={isAdmin} />}
               />
               <Route
                 path="shelf/:id"
@@ -319,10 +333,11 @@ export default function App() {
                     shelves={shelves}
                     isCoverHidden={isCoverHidden}
                     loading={loading}
+                    isAdmin={isAdmin}
                   />
                 }
               />
-              <Route path="summary" element={<SummaryPage books={books} />} />
+              <Route path="summary" element={<SummaryPage books={books} isAdmin={isAdmin} />} />
               <Route path="writters" element={<Writters books={books} />} />
               <Route path="game" element={<DotsAndBoxes />} />
             </Route>
@@ -373,13 +388,23 @@ export default function App() {
             />
           )}
         </AnimatePresence>
+
+        <AnimatePresence>
+          {showAdminModal && (
+            <AdminLoginModal
+              open={showAdminModal}
+              onClose={() => setShowAdminModal(false)}
+              onAuthChange={handleAuthChange}
+            />
+          )}
+        </AnimatePresence>
       </div>
       <Analytics />
     </BrowserRouter>
   );
 }
 
-function ShelfRoute({ books, shelves, isCoverHidden, loading }) {
+function ShelfRoute({ books, shelves, isCoverHidden, loading, isAdmin }) {
   const { id } = useParams();
   const navigate = useNavigate();
   return (
@@ -390,6 +415,7 @@ function ShelfRoute({ books, shelves, isCoverHidden, loading }) {
       isCoverHidden={isCoverHidden}
       isLoading={loading}
       onOpen={(bookId) => navigate(`/book/${bookId}`)}
+      isAdmin={isAdmin}
     />
   );
 }

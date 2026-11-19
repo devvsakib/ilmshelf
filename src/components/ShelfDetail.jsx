@@ -8,7 +8,15 @@ import {
 import { Button } from '@/components/ui/button';
 import BookList from './BookList';
 
-function ShelfDetail({ books = [], shelves = [], shelfId, onOpen, isCoverHidden, isLoading = false }) {
+function ShelfDetail({
+    books = [],
+    shelves = [],
+    shelfId,
+    onOpen,
+    isCoverHidden,
+    isAdmin = false,
+    isLoading = false,
+}) {
     const navigate = useNavigate();
     const [hydrationTimedOut, setHydrationTimedOut] = useState(false);
 
@@ -131,14 +139,19 @@ function ShelfDetail({ books = [], shelves = [], shelfId, onOpen, isCoverHidden,
                             Valuation
                         </div>
                         <div className="font-mono text-base font-bold text-primary tabular-nums mt-0.5">
-                            ৳{totalValue.toLocaleString()}
+                            {isAdmin ? `৳${totalValue.toLocaleString()}` : '--'}
                         </div>
                     </div>
                 </div>
             </header>
 
             {/* Shelf Volumes (inherits Shelf Grid + Catalog Ledger toggle from BookList) */}
-            <BookList books={shelfBooks} onOpen={onOpen} isCoverHidden={isCoverHidden} />
+            <BookList
+                books={shelfBooks}
+                onOpen={onOpen}
+                isCoverHidden={isCoverHidden}
+                isAdmin={isAdmin}
+            />
         </div>
     );
 }

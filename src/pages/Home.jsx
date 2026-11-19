@@ -3,7 +3,7 @@ import { IconPlus, IconLoader2 } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import BookList from '@/components/BookList';
 
-function Home({ filteredBooks = [], loading = false, isCoverHidden, setIsAddingBook }) {
+function Home({ filteredBooks = [], loading = false, isCoverHidden, setIsAddingBook, isAdmin }) {
   const navigate = useNavigate();
 
   const totalCount = filteredBooks.length;
@@ -43,14 +43,14 @@ function Home({ filteredBooks = [], loading = false, isCoverHidden, setIsAddingB
           </p>
         </div>
 
-        <Button
+        {isAdmin && <Button
           type="button"
           onClick={() => setIsAddingBook(true)}
           className="h-9 px-4 bg-primary text-primary-foreground hover:bg-primary/90 text-xs sm:text-sm font-medium gap-1.5 self-start sm:self-auto shadow-2xs"
         >
           <IconPlus size={16} />
           <span>Add Volume</span>
-        </Button>
+        </Button>}
       </header>
 
       {/* Main Catalog Grid / Ledger */}
