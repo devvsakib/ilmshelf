@@ -1,86 +1,93 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Home, ArrowLeft } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
+import {
+    IconBookOff,
+    IconHome,
+    IconArrowLeft,
+    IconBooks,
+    IconLayoutGrid,
+    IconChartBar,
+    IconFeather,
+    IconSparkles,
+} from '@tabler/icons-react';
 
-/**
- * 404 Not Found Page Component
- * Displays when user navigates to non-existent route
- */
-function NotFound() {
+export default function NotFound() {
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const quickLinks = [
+        { to: '/', label: 'All Books', icon: IconBooks },
+        { to: '/shelves', label: 'Shelves', icon: IconLayoutGrid },
+        { to: '/summary', label: 'Collection Summary', icon: IconChartBar },
+        { to: '/writters', label: 'Writers', icon: IconFeather },
+        { to: '/usapp', label: 'UdyoktaStudio', icon: IconSparkles },
+    ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center px-4">
-            <div className="max-w-md w-full text-center">
-                <div className="mb-8">
-                    <h1 className="text-9xl font-bold text-white mb-4">404</h1>
-                    <h2 className="text-3xl font-semibold text-white mb-2">
-                        Page Not Found
-                    </h2>
-                    <p className="text-slate-300 mb-2">
-                        The page you're looking for doesn't exist.
-                    </p>
-                    <p className="text-sm text-slate-400 font-mono">
-                        {location.pathname}
-                    </p>
+        <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center px-4 py-12">
+            <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-lg w-full bg-white border border-slate-200/80 rounded-2xl shadow-sm p-8 text-center"
+            >
+                <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <IconBookOff size={34} stroke={1.75} />
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <span className="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold tracking-wide uppercase mb-3">
+                    404 Error
+                </span>
+
+                <h1 className="text-3xl font-bold text-slate-900 mb-2">
+                    Page Not Found
+                </h1>
+
+                <p className="text-slate-600 text-sm mb-3">
+                    This shelf or page doesn&apos;t exist or may have been moved.
+                </p>
+
+                <div className="inline-block max-w-full truncate px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-mono mb-7">
+                    {location.pathname}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
                         to="/"
-                        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-lg font-semibold hover:bg-slate-100 transition-colors"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors shadow-xs"
                     >
-                        <Home size={20} />
-                        Go Home
+                        <IconHome size={18} />
+                        Back to My Books
                     </Link>
 
                     <button
-                        onClick={() => window.history.back()}
-                        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700 transition-colors"
+                        type="button"
+                        onClick={() => navigate(-1)}
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
                     >
-                        <ArrowLeft size={20} />
+                        <IconArrowLeft size={18} />
                         Go Back
                     </button>
                 </div>
 
-                <div className="mt-12 p-6 bg-slate-800/50 rounded-lg backdrop-blur">
-                    <h3 className="text-white font-semibold mb-4">Quick Links</h3>
-                    <div className="space-y-2">
-                        <Link
-                            to="/"
-                            className="block text-slate-300 hover:text-white transition-colors"
-                        >
-                            → Book Management App
-                        </Link>
-                        <Link
-                            to="/usapp"
-                            className="block text-slate-300 hover:text-white transition-colors"
-                        >
-                            → UdyoktaStudio
-                        </Link>
-                        <Link
-                            to="/usapp/demo/fashion"
-                            className="block text-slate-300 hover:text-white transition-colors"
-                        >
-                            → Fashion Demo Store
-                        </Link>
-                        <Link
-                            to="/usapp/demo/cosmetics"
-                            className="block text-slate-300 hover:text-white transition-colors"
-                        >
-                            → Cosmetics Demo Store
-                        </Link>
-                        <Link
-                            to="/usapp/demo/gadgets"
-                            className="block text-slate-300 hover:text-white transition-colors"
-                        >
-                            → Gadgets Demo Store
-                        </Link>
+                <div className="mt-8 pt-6 border-t border-slate-100 text-left">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
+                        Quick Navigation
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {quickLinks.map(({ to, label, icon: Icon }) => (
+                            <Link
+                                key={to}
+                                to={to}
+                                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                            >
+                                <Icon size={17} className="text-emerald-600 shrink-0" />
+                                <span>{label}</span>
+                            </Link>
+                        ))}
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }
-
-export default NotFound;
