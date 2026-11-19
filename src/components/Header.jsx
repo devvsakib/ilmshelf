@@ -16,6 +16,7 @@ import {
     IconEyeOff,
     IconMenu2,
     IconX,
+    IconUser,
 } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -73,6 +74,7 @@ export default function Header({
         { label: 'Reading Goals', icon: IconTarget, action: onOpenGoals },
         { label: 'Wishlist', icon: IconHeart, action: onOpenWishlist },
         { label: 'Lending Tracker', icon: IconUsers, action: onOpenLending },
+        { label: <Link to="/writters">Writters</Link>, icon: IconUser }
     ];
 
     return (

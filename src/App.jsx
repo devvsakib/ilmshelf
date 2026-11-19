@@ -16,14 +16,8 @@ import DotsAndBoxes from './pages/DotsAndBoxes';
 import Home from './pages/Home';
 import AnalyticsPage from './components/AnalyticsPage';
 import Writters from './pages/Writters';
-import USApp from './pages/UdyoktaStudio';
-import CosmeticsDemo from './pages/udyoktastudio/demo/CosmeticsDemo';
 import NotFound from './pages/NotFound';
-import GadgetsDemo from './pages/udyoktastudio/demo/GadgetsDemo';
-import USAppLayout from './pages/USAppLayout';
 import BookAppLayout from './pages/BookAppLayout';
-import FashionDemo from './pages/udyoktastudio/demo/FashionDemo';
-import HoneySeed from './pages/udyoktastudio/demo/HoneySeed';
 import { useBooks } from './hooks/useBooks';
 import { useShelves } from './hooks/useShelves';
 import { cn } from '@/lib/utils';
@@ -77,12 +71,6 @@ function Toast({ message, type = 'info', onClose }) {
       </button>
     </motion.div>
   );
-}
-
-function ConditionalHeader(props) {
-  const { pathname } = useLocation();
-  if (pathname.startsWith('/usapp')) return null;
-  return <Header {...props} />;
 }
 
 export default function App() {
@@ -269,7 +257,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-background text-foreground">
-        <ConditionalHeader
+        <Header
           q={searchQuery}
           setQ={setSearchQuery}
           onExport={exportData}
@@ -337,15 +325,6 @@ export default function App() {
               <Route path="summary" element={<SummaryPage books={books} />} />
               <Route path="writters" element={<Writters books={books} />} />
               <Route path="game" element={<DotsAndBoxes />} />
-            </Route>
-
-            {/* UdyoktaStudio App Routes */}
-            <Route path="/usapp" element={<USAppLayout />}>
-              <Route index element={<USApp />} />
-              <Route path="demo/fashion" element={<FashionDemo />} />
-              <Route path="demo/cosmetics" element={<CosmeticsDemo />} />
-              <Route path="demo/gadgets" element={<GadgetsDemo />} />
-              <Route path="demo/honeyseed" element={<HoneySeed />} />
             </Route>
 
             {/* 404 Not Found */}
