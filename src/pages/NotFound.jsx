@@ -19,8 +19,7 @@ export default function NotFound() {
         { to: '/', label: 'All Books', icon: IconBooks },
         { to: '/shelves', label: 'Shelves', icon: IconLayoutGrid },
         { to: '/summary', label: 'Collection Summary', icon: IconChartBar },
-        { to: '/writters', label: 'Writers', icon: IconFeather },
-        { to: '/usapp', label: 'UdyoktaStudio', icon: IconSparkles },
+        { to: '/writters', label: 'Writers', icon: IconFeather }
     ];
 
     return (
